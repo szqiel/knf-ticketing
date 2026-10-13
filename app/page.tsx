@@ -24,7 +24,7 @@ export default function HomePage() {
           <section className={styles.heroSection}>
             <div className={styles.schedulePill}>PROGRAM SCHEDULE</div>
             <Image
-              src="/assets/festival-programs.svg"
+              src="/assets/festival-programs-vector.svg"
               alt="Festival Programs"
               width={408}
               height={171}
