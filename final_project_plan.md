@@ -24,7 +24,7 @@
 | 13 | **Mobile Seat Map UX** | **Horizontal Pan / Scroll** | On mobile screens, the 500-seat SVG map renders at a fixed readable scale inside a smooth horizontal scroll container with a swipe indicator. |
 | 14 | **Form Contact Input** | **Freeform Validation (> 2 chars)** | `INSTAGRAM/PHONE NUMBER *` accepts any text longer than 2 characters (flexible for `@username`, phone digits, etc.) to minimize booking friction. |
 | 15 | **Admin Panel Scope** | **CMS + Live Seats + Reports** | Single shared admin password. Program/film CRUD, poster uploads, live seat grid with manual seat blocker, audience list with cancel, daily reports, and exports to **Excel (`exceljs`)** and **PDF (`@react-pdf/renderer`)**. |
-| 16 | **Tech Stack & Hosting** | **Next.js + Postgres on Coolify** | Next.js 15 App Router, TypeScript, Drizzle ORM, PostgreSQL 16, SSE via `LISTEN/NOTIFY`, persistent volume for media, 100% self-hosted on Coolify. |
+| 16 | **Tech Stack & Hosting** | **Next.js 16 + Postgres on Coolify** | Next.js 16.4.0 App Router, React 19.3, Turbopack default, React Compiler, TypeScript, Drizzle ORM, PostgreSQL 16, SSE via `LISTEN/NOTIFY`, persistent volume for media, 100% self-hosted on Coolify. |
 
 ---
 
@@ -147,7 +147,7 @@ flowchart LR
 
   subgraph Coolify["Coolify VPS (Single Docker Container)"]
     Traefik["Reverse Proxy / SSL"]
-    Next["Next.js 15 App Router<br>(Node.js Standalone)"]
+    Next["Next.js 16.4.0 App Router<br>(React 19.3 Standalone)"]
     Drizzle["Drizzle ORM Engine"]
     Vol["Persistent Volume: /data/uploads"]
   end
@@ -162,11 +162,12 @@ flowchart LR
   PG -- "LISTEN / NOTIFY" --> Next
 ```
 
-* **Framework**: Next.js 15 (App Router, Standalone output).
-* **Styling**: Native CSS Modules + `tokens.css` for public screens (precise Y2K styling); Tailwind v4 + shadcn/ui for Admin.
-* **Database & ORM**: PostgreSQL 16 + Drizzle ORM with migration scripts.
-* **Real-time Live Sync**: SSE endpoint `/api/programs/[id]/stream` consuming PostgreSQL `pg_notify('seats_changed', ...)`.
-* **Media Handling**: `sharp` compressing uploads into WebP format on local disk volume.
+* **Framework**: Next.js 16.4.0 (App Router, React 19.3, Turbopack default bundler, React Compiler stable, Standalone output).
+* **Styling**: Native CSS Modules + `tokens.css` for public screens (precise Y2K / Frutiger Aero / Aqua styling); Tailwind CSS v4 + Radix/shadcn UI for Admin Panel.
+* **Database & ORM**: PostgreSQL 16 + Drizzle ORM (`drizzle-orm` + `drizzle-kit`) with automated migrations.
+* **Validation & Contracts**: Zod v3 (`/lib/contracts.ts`) for unified schema validation across Client, Server Actions, and Route Handlers.
+* **Real-time Live Sync**: SSE endpoint `/api/programs/[id]/stream` consuming PostgreSQL `pg_notify('seats_changed', ...)` with native client auto-reconnect.
+* **Media Handling**: `sharp` compressing uploads into high-efficiency WebP format on local Docker persistent volume.
 * **Report Generation**:
   * Excel: `exceljs` with branded headers, borders, frozen header row, and totals.
   * PDF: `@react-pdf/renderer` rendering clean, high-resolution A4 festival reports.
