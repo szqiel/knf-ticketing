@@ -70,3 +70,16 @@
   color: #8c8c8c;
   margin: 6px 0 0 0;
 }
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .soldOutTitle {
+    font-size: 24px;
+    line-height: 1.1;
+  }
+
+  .soldOutSubtitle {
+    font-size: 13px;
+    margin-top: 3px;
+  }
+}

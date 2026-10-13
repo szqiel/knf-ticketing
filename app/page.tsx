@@ -54,7 +54,7 @@ export default function HomePage() {
                       src={program.posterUrl}
                       alt={program.title}
                       fill
-                      sizes="200px"
+                      sizes="(max-width: 640px) 140px, 200px"
                       style={{ objectFit: "cover" }}
                     />
                   ) : (
