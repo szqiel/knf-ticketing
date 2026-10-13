@@ -385,8 +385,8 @@
   text-transform: uppercase;
 }
 
-/* Responsive Breakpoint: When not full screen (<= 1100px), switch to 1-column layout to preserve card proportions */
-@media (max-width: 1100px) {
+/* Responsive Breakpoint: When not full screen (<= 1180px), switch to 1-column layout to preserve card proportions */
+@media (max-width: 1180px) {
   .gridContainer {
     grid-template-columns: 1fr;
     gap: 16px;

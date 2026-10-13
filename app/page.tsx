@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./home.module.css";
 import { MOCK_PROGRAMS } from "@/lib/data/mock-programs";
+import { ProgramTitle } from "@/components/home/ProgramTitle";
 
 export default function HomePage() {
   return (
@@ -24,12 +25,11 @@ export default function HomePage() {
           <section className={styles.heroSection}>
             <div className={styles.schedulePill}>PROGRAM SCHEDULE</div>
             <Image
-              src="/assets/festival-programs-vector.svg"
+              src="/assets/festival-programs.png"
               alt="Festival Programs"
               width={408}
               height={171}
               priority
-              style={{ height: "auto" }}
               className={styles.wordmarkImage}
             />
           </section>
@@ -69,18 +69,11 @@ export default function HomePage() {
                 {/* Right: Content Area */}
                 <div className={styles.contentBox}>
                   <div className={styles.titleArea}>
-                    <h2
-                      className={
-                        program.isSoldOut
-                          ? styles.titleSoldOut
-                          : styles.titleActive
-                      }
-                    >
-                      {program.title}
-                    </h2>
-                    {program.subtitle && (
-                      <p className={styles.subtitle}>{program.subtitle}</p>
-                    )}
+                    <ProgramTitle
+                      title={program.title}
+                      subtitle={program.subtitle}
+                      isSoldOut={program.isSoldOut}
+                    />
                   </div>
 
                   <div
