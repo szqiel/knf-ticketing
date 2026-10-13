@@ -102,11 +102,6 @@ export default function HomePage() {
               </Link>
             ))}
           </section>
-
-          {/* Footer */}
-          <footer className={styles.footer}>
-            <span className={styles.footerText}>KNF 2026</span>
-          </footer>
         </div>
       </div>
     </main>
