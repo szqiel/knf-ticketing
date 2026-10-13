@@ -28,15 +28,15 @@ export function ProgramTitle({ title, subtitle, isSoldOut }: ProgramTitleProps) 
 
   // Active program title with 1:1 Figma gradients, outline, and drop shadows
   const hasSubtitle = Boolean(subtitle);
-  const svgHeight = hasSubtitle ? 56 : 42;
-  const viewBox = `0 0 340 ${svgHeight}`;
+  const svgHeight = hasSubtitle ? 66 : 42;
+  const viewBox = `0 0 320 ${svgHeight}`;
 
   return (
     <div className={styles.activeContainer}>
       <svg
         viewBox={viewBox}
         className={styles.titleSvg}
-        style={{ height: hasSubtitle ? "56px" : "42px" }}
+        style={{ height: hasSubtitle ? "66px" : "42px" }}
         aria-label={subtitle ? `${title} - ${subtitle}` : title}
         role="img"
       >
@@ -102,7 +102,7 @@ export function ProgramTitle({ title, subtitle, isSoldOut }: ProgramTitleProps) 
         {/* Main Title */}
         <text
           x="1"
-          y={hasSubtitle ? "29" : "33"}
+          y={hasSubtitle ? "30" : "33"}
           className={styles.svgTitleText}
           fill={`url(#${fillId})`}
           stroke={`url(#${strokeId})`}
@@ -117,7 +117,7 @@ export function ProgramTitle({ title, subtitle, isSoldOut }: ProgramTitleProps) 
         {subtitle && (
           <text
             x="1"
-            y="50"
+            y="57"
             className={styles.svgSubtitleText}
             fill={`url(#${fillId})`}
           >

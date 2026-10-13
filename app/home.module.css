@@ -209,7 +209,7 @@
 
 /* Right Content Box */
 .contentBox {
-  padding: 24px 20px 18px 24px;
+  padding: 28px 20px 20px 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
