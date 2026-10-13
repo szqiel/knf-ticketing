@@ -1,85 +1,282 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import type { Seat } from "@/lib/contracts";
 import styles from "./SeatMap.module.css";
 
-type SeatMapProps = {
+export type SeatMapLayout = "grid" | "cinema";
+
+export type SeatMapLegend = {
+  available: string;
+  selected: string;
+  booked: string;
+  blocked: string;
+};
+
+export type SeatMapCopy = {
+  eyebrow: string;
+  title: string;
+  availabilitySuffix: string;
+  swipeHint: string;
+  screenLabel: string;
+  summaryLabel: string;
+  emptySeatLabel: string;
+  confirmLabel: string;
+  legend: SeatMapLegend;
+};
+
+export type SeatMapVisuals = {
+  canvasMinWidth: number;
+  seatMinSize: number;
+  seatGap: number;
+  canvasBottomPadding: number;
+};
+
+export type SeatMapProps = {
   seats: Seat[];
   selectedSeatId: string | null;
   onSelectSeat: (seat: Seat) => void;
   onConfirm: () => void;
+  copy?: Partial<SeatMapCopy>;
+  visuals?: Partial<SeatMapVisuals>;
+  layout?: SeatMapLayout;
+  showHeader?: boolean;
+  showLegend?: boolean;
+  showSwipeHint?: boolean;
+  showAvailability?: boolean;
+  confirmButtonState?: "auto" | "active" | "disabled";
 };
+
+const defaultCopy: SeatMapCopy = {
+  eyebrow: "DENAH KURSI",
+  title: "Pilih tempat dudukmu",
+  availabilitySuffix: "kursi tersedia",
+  swipeHint: "← Geser denah →",
+  screenLabel: "LAYAR",
+  summaryLabel: "YOUR SEAT",
+  emptySeatLabel: "—",
+  confirmLabel: "Confirm Seats",
+  legend: {
+    available: "Tersedia",
+    selected: "Pilihanmu",
+    booked: "Terisi",
+    blocked: "Ditutup",
+  },
+};
+
+const defaultVisuals: SeatMapVisuals = {
+  canvasMinWidth: 944,
+  seatMinSize: 36,
+  seatGap: 7,
+  canvasBottomPadding: 128,
+};
+
+type SeatMapStyle = CSSProperties & {
+  "--seat-map-min-width": string;
+  "--seat-map-seat-size": string;
+  "--seat-map-gap": string;
+  "--seat-map-bottom-padding": string;
+};
+
+const cinemaSections = [
+  { key: "topLeft", rows: [9, 9, 9, 9, 9, 9, 9, 9] },
+  { key: "topCenter", rows: [11, 12, 13, 13, 14, 14, 14, 15] },
+  { key: "topRight", rows: [9, 9, 9, 9, 9, 9, 9, 9] },
+  { key: "bottomLeft", rows: [6, 6, 6, 6, 6, 6, 6, 6] },
+  { key: "bottomCenterLeft", rows: [8, 8, 8, 8, 9, 9, 9, 9, 9] },
+  { key: "bottomCenterRight", rows: [8, 8, 8, 8, 9, 9, 9, 9, 9] },
+  { key: "bottomRight", rows: [6, 6, 6, 6, 6, 6, 6, 6] },
+] as const;
 
 function isUnavailable(seat: Seat) {
   return seat.status !== "available";
 }
 
-export function SeatMap({ seats, selectedSeatId, onSelectSeat, onConfirm }: SeatMapProps) {
-  const availableCount = seats.filter((seat) => seat.status === "available").length;
-  const selectedSeat = seats.find((seat) => seat.id === selectedSeatId);
+function getSeatClass(seat: Seat, selected: boolean, layout: SeatMapLayout) {
+  if (layout === "cinema") {
+    return [
+      styles.seat,
+      styles.cinemaSeat,
+      isUnavailable(seat) ? styles.cinemaSold : styles.cinemaAvailable,
+      selected ? styles.cinemaSelected : "",
+    ].filter(Boolean).join(" ");
+  }
+
+  return [
+    styles.seat,
+    isUnavailable(seat) ? styles[seat.status] : styles.available,
+    selected ? styles.selected : "",
+  ].filter(Boolean).join(" ");
+}
+
+function SeatButton({ seat, selected, layout, onSelectSeat }: {
+  seat: Seat;
+  selected: boolean;
+  layout: SeatMapLayout;
+  onSelectSeat: (seat: Seat) => void;
+}) {
+  const unavailable = isUnavailable(seat);
 
   return (
-    <section className={styles.shell} aria-label="Interactive seat map">
-      <div className={styles.headerRow}>
-        <div>
-          <p className={styles.eyebrow}>DENAH KURSI</p>
-          <h1 className={styles.title}>Pilih tempat dudukmu</h1>
-        </div>
-        <p className={styles.availability}>{availableCount} kursi tersedia</p>
-      </div>
+    <button
+      className={getSeatClass(seat, selected, layout)}
+      disabled={unavailable}
+      type="button"
+      aria-label={`Seat ${seat.label}${unavailable ? `, ${seat.status}` : ""}`}
+      aria-pressed={selected}
+      onClick={() => onSelectSeat(seat)}
+    >
+      {layout === "grid" ? seat.label : ""}
+    </button>
+  );
+}
 
-      <p className={styles.swipeHint} aria-hidden="true">← Geser denah →</p>
+export function SeatLegend({ labels = defaultCopy.legend, className = "" }: { labels?: Partial<SeatMapLegend>; className?: string }) {
+  const legend = { ...defaultCopy.legend, ...labels };
 
-      <div className={styles.mapViewport}>
-        <div className={styles.mapCanvas}>
-          <div className={styles.screen}>LAYAR</div>
-          <div className={styles.seatGrid}>
-            {seats.map((seat) => {
-              const unavailable = isUnavailable(seat);
-              const selected = seat.id === selectedSeatId;
-              const seatClass = [
-                styles.seat,
-                unavailable ? styles[seat.status] : styles.available,
-                selected ? styles.selected : "",
-              ].filter(Boolean).join(" ");
+  return (
+    <div className={`${styles.legend} ${className}`} aria-label="Seat status legend">
+      <span><i className={`${styles.legendDot} ${styles.legendAvailable}`} /> {legend.available}</span>
+      <span><i className={`${styles.legendDot} ${styles.legendSelected}`} /> {legend.selected}</span>
+      <span><i className={`${styles.legendDot} ${styles.legendSold}`} /> {legend.booked}</span>
+    </div>
+  );
+}
+
+function CinemaSeatLayout({ seats, selectedSeatId, onSelectSeat }: {
+  seats: Seat[];
+  selectedSeatId: string | null;
+  onSelectSeat: (seat: Seat) => void;
+}) {
+  return (
+    <div className={styles.cinemaGrid}>
+      {cinemaSections.map((section, sectionIndex) => {
+        const sectionCount = section.rows.reduce((total, rowCount) => total + rowCount, 0);
+        const sectionStart = cinemaSections
+          .slice(0, sectionIndex)
+          .reduce((total, currentSection) => total + currentSection.rows.reduce((rowTotal, rowCount) => rowTotal + rowCount, 0), 0);
+        const sectionSeats = seats.slice(sectionStart, sectionStart + sectionCount);
+        const maxColumns = Math.max(...section.rows);
+
+        return (
+          <div
+            className={`${styles.cinemaBlock} ${styles[section.key]}`}
+            key={section.key}
+            style={{ "--section-columns": maxColumns } as CSSProperties}
+          >
+            {section.rows.map((rowCount, rowIndex) => {
+              const rowStart = section.rows
+                .slice(0, rowIndex)
+                .reduce((total, currentRowCount) => total + currentRowCount, 0);
+              const rowSeats = sectionSeats.slice(rowStart, rowStart + rowCount);
 
               return (
-                <button
-                  className={seatClass}
-                  disabled={unavailable}
-                  key={seat.id}
-                  type="button"
-                  aria-label={`Seat ${seat.label}${unavailable ? `, ${seat.status}` : ""}`}
-                  aria-pressed={selected}
-                  onClick={() => onSelectSeat(seat)}
-                >
-                  {seat.label}
-                </button>
+                <div className={styles.cinemaRow} key={`${section.key}-${rowIndex}`} style={{ "--row-columns": rowCount } as CSSProperties}>
+                  {rowSeats.map((seat) => (
+                    <SeatButton
+                      key={seat.id}
+                      layout="cinema"
+                      seat={seat}
+                      selected={seat.id === selectedSeatId}
+                      onSelectSeat={onSelectSeat}
+                    />
+                  ))}
+                </div>
               );
             })}
           </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function SeatMap({
+  seats,
+  selectedSeatId,
+  onSelectSeat,
+  onConfirm,
+  copy: copyOverrides,
+  visuals: visualOverrides,
+  layout = "grid",
+  showHeader = true,
+  showLegend = true,
+  showSwipeHint = true,
+  showAvailability = true,
+  confirmButtonState = "auto",
+}: SeatMapProps) {
+  const copy = {
+    ...defaultCopy,
+    ...copyOverrides,
+    legend: { ...defaultCopy.legend, ...copyOverrides?.legend },
+  };
+  const visuals = { ...defaultVisuals, ...visualOverrides };
+  const availableCount = seats.filter((seat) => seat.status === "available").length;
+  const selectedSeat = seats.find((seat) => seat.id === selectedSeatId);
+  const confirmActive = confirmButtonState === "active"
+    || (confirmButtonState === "auto" && Boolean(selectedSeat));
+  const style: SeatMapStyle = {
+    "--seat-map-min-width": `${visuals.canvasMinWidth}px`,
+    "--seat-map-seat-size": `${visuals.seatMinSize}px`,
+    "--seat-map-gap": `${visuals.seatGap}px`,
+    "--seat-map-bottom-padding": `${visuals.canvasBottomPadding}px`,
+  };
+
+  return (
+    <section className={`${styles.shell} ${layout === "cinema" ? styles.cinemaShell : ""}`} aria-label="Interactive seat map" style={style}>
+      {showHeader && (
+        <div className={styles.headerRow}>
+          <div>
+            {copy.eyebrow && <p className={styles.eyebrow}>{copy.eyebrow}</p>}
+            <h1 className={styles.title}>{copy.title}</h1>
+          </div>
+          {showAvailability && <p className={styles.availability}>{availableCount} {copy.availabilitySuffix}</p>}
+        </div>
+      )}
+
+      {showSwipeHint && <p className={styles.swipeHint} aria-hidden="true">{copy.swipeHint}</p>}
+
+      <div className={`${styles.mapViewport} ${layout === "cinema" ? styles.cinemaViewport : ""}`}>
+        <div className={`${styles.mapCanvas} ${layout === "cinema" ? styles.cinemaCanvas : ""}`}>
+          {layout === "cinema" ? (
+            <>
+              <div className={styles.cinemaScreen}>{copy.screenLabel}</div>
+              <CinemaSeatLayout seats={seats} selectedSeatId={selectedSeatId} onSelectSeat={onSelectSeat} />
+            </>
+          ) : (
+            <>
+              <div className={styles.screen}>{copy.screenLabel}</div>
+              <div className={styles.seatGrid}>
+                {seats.map((seat) => (
+                  <SeatButton
+                    key={seat.id}
+                    layout="grid"
+                    seat={seat}
+                    selected={seat.id === selectedSeatId}
+                    onSelectSeat={onSelectSeat}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      <div className={styles.legend} aria-label="Seat status legend">
-        <span><i className={`${styles.legendDot} ${styles.available}`} /> Tersedia</span>
-        <span><i className={`${styles.legendDot} ${styles.selected}`} /> Pilihanmu</span>
-        <span><i className={`${styles.legendDot} ${styles.booked}`} /> Terisi</span>
-        <span><i className={`${styles.legendDot} ${styles.blocked}`} /> Ditutup</span>
-      </div>
+      {showLegend && <SeatLegend labels={copy.legend} />}
 
       <aside className={styles.summaryRail} aria-live="polite">
         <div>
-          <span className={styles.summaryLabel}>YOUR SEAT</span>
-          <strong className={styles.summarySeat}>{selectedSeat?.label ?? "—"}</strong>
+          <span className={styles.summaryLabel}>{copy.summaryLabel}</span>
+          <strong className={styles.summarySeat}>{selectedSeat?.label ?? copy.emptySeatLabel}</strong>
         </div>
+        <span className={styles.selectedCount}>{selectedSeat ? "1 seat" : "0 seats"}</span>
         <button
-          className={`${styles.confirmButton} ${selectedSeat ? styles.confirmActive : ""}`}
+          className={`${styles.confirmButton} ${confirmActive ? styles.confirmActive : ""}`}
           disabled={!selectedSeat}
           type="button"
           onClick={onConfirm}
         >
-          Confirm Seats <span aria-hidden="true">→</span>
+          {copy.confirmLabel} <span aria-hidden="true">→</span>
         </button>
       </aside>
     </section>

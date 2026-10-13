@@ -3,15 +3,16 @@
 import { useState } from "react";
 import type { Seat } from "@/lib/contracts";
 import { NoSeatsModal } from "./NoSeatsModal";
-import { SeatMap } from "./SeatMap";
+import { SeatMap, type SeatMapProps } from "./SeatMap";
 import { YourDetailsModal, type BookingDetails } from "./YourDetailsModal";
 
 type BookingExperienceProps = {
   seats: Seat[];
   onBookingDetails?: (seat: Seat, details: BookingDetails) => void | Promise<void>;
+  seatMapProps?: Partial<Omit<SeatMapProps, "seats" | "selectedSeatId" | "onSelectSeat" | "onConfirm">>;
 };
 
-export function BookingExperience({ seats, onBookingDetails }: BookingExperienceProps) {
+export function BookingExperience({ seats, onBookingDetails, seatMapProps }: BookingExperienceProps) {
   const [selectedSeatId, setSelectedSeatId] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [noSeatsOpen, setNoSeatsOpen] = useState(false);
@@ -28,6 +29,7 @@ export function BookingExperience({ seats, onBookingDetails }: BookingExperience
   return (
     <>
       <SeatMap
+        {...seatMapProps}
         seats={seats}
         selectedSeatId={selectedSeatId}
         onSelectSeat={(seat) => setSelectedSeatId(seat.id)}
