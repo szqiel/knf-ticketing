@@ -1,0 +1,412 @@
+/* ==========================================================================
+   HOME SHOWCASE (OPSI 1) - Y2K / Windows XP Frutiger Aero Styling
+   Exact 1:1 match to Figma Node #113:226
+   ========================================================================== */
+
+.pageWrapper {
+  min-height: 100vh;
+  width: 100%;
+  background-image: url("/assets/home-bg.png");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  font-family: "Arial Narrow", Arial, "Helvetica Neue", sans-serif;
+  color: #000a69;
+}
+
+/* Semi-transparent glass overlay matching App node #113:228 */
+.overlay {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  display: flex;
+  justify-content: center;
+}
+
+.kioskContainer {
+  width: 100%;
+  max-width: 1195px;
+  padding: 28px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header with mascot */
+.header {
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.mascotLogo {
+  width: 88px;
+  height: 88px;
+  object-fit: contain;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.31));
+}
+
+/* Hero Section: Pill & Wordmark */
+.heroSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 0 24px;
+  position: relative;
+}
+
+.schedulePill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 24px;
+  height: 26px;
+  border-radius: 41px;
+  background: linear-gradient(
+    0deg,
+    rgba(13, 233, 53, 1) 0%,
+    rgba(181, 248, 170, 1) 54%,
+    rgba(216, 255, 205, 1) 74%,
+    rgba(113, 236, 150, 1) 100%
+  );
+  border: 1px solid #71a0ec;
+  box-shadow: 0px -2px 14px 0px rgba(255, 255, 255, 0.71),
+    0px 2px 4px 0px rgba(0, 0, 0, 0.15);
+  font-family: Arial, "Arial Black", sans-serif;
+  font-weight: 900;
+  font-size: 11.5px;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  color: #0015cf;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.wordmarkImage {
+  width: 407.5px;
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0px 4px 0px rgba(0, 10, 105, 0.9));
+  user-select: none;
+}
+
+/* 2-Column Program Cards Grid */
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+
+/* Common Program Card */
+.programCard {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  height: 204.8px;
+  border-radius: 20px;
+  overflow: hidden;
+  text-decoration: none;
+  box-shadow: 0px 1px 19.7px 0px rgba(0, 10, 105, 0.85);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.programCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 4px 24px 0px rgba(0, 10, 105, 1);
+}
+
+/* Active Card Styling */
+.cardActive {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(126, 171, 243, 1) 87%,
+    rgba(199, 220, 255, 1) 97%
+  );
+  border: 2px solid #a4c2f4;
+}
+
+/* Sold Out Card Styling */
+.cardSoldOut {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(232, 232, 232, 1) 87%,
+    rgba(255, 255, 255, 1) 97%
+  );
+  border: 2px solid #83a7e2;
+}
+
+/* Left Poster Box */
+.posterBox {
+  width: 200px;
+  height: 204.8px;
+  background-color: #e7e7e3;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Placeholder Diagonal Lines */
+.crossLine1,
+.crossLine2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.crossLine1 {
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 0.5px),
+    #b8b8b2 calc(50% - 0.5px),
+    #b8b8b2 calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+}
+
+.crossLine2 {
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.5px),
+    #b8b8b2 calc(50% - 0.5px),
+    #b8b8b2 calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+}
+
+.posterBadge {
+  position: relative;
+  z-index: 2;
+  padding: 6px 12px;
+  background: #efefe7;
+  border: 0.8px solid #353533;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  font-size: 10.9px;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  color: #111110;
+  text-transform: uppercase;
+}
+
+/* Right Content Box */
+.contentBox {
+  padding: 24px 20px 18px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.titleArea {
+  display: flex;
+  flex-direction: column;
+}
+
+.titleActive {
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1.05;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 21, 207, 1) 16%,
+    rgba(135, 147, 255, 1) 40%,
+    rgba(4, 24, 206, 1) 44%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.8px #0011ad;
+  filter: drop-shadow(0px 1px 0px #0015cf) drop-shadow(0px 4px 4px #8db9ff);
+  margin: 0;
+}
+
+.titleSoldOut {
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1.05;
+  color: #a5a5a5;
+  text-shadow: 0px 1px 0px #a3a3a3;
+  margin: 0;
+}
+
+.subtitle {
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.3;
+  color: #0015cf;
+  margin: 4px 0 0 0;
+}
+
+/* Schedule Time Pill */
+.timePillActive {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 313px;
+  height: 42px;
+  border-radius: 9px;
+  padding: 0 14px;
+  background: linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.76) 100%
+  );
+  box-shadow: inset 0px 0px 4px 0px rgba(0, 10, 105, 1);
+  margin: 10px 0 12px 0;
+}
+
+.timePillSoldOut {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 313px;
+  height: 42px;
+  border-radius: 9px;
+  padding: 0 14px;
+  background: linear-gradient(0deg, #dadada 0%, #ffffff 100%);
+  box-shadow: inset 0px 0px 4px 0px rgba(88, 70, 0, 0.49);
+  margin: 10px 0 12px 0;
+}
+
+.dayLabel {
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 12.5px;
+  color: #000a69;
+  width: 65px;
+}
+
+.timeLabel {
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  color: #000a69;
+}
+
+/* Status Badges */
+.badgeActive {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 27px;
+  background: linear-gradient(
+    180deg,
+    rgba(243, 243, 243, 1) 18%,
+    rgba(255, 255, 255, 1) 37%,
+    rgba(193, 193, 193, 1) 77%,
+    rgba(242, 242, 242, 1) 100%
+  );
+  border: 1px solid #a1a1a1;
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-weight: 700;
+  font-size: 11.2px;
+  letter-spacing: 0.05em;
+  color: #111110;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.badgeSoldOut {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 27px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 227, 227, 1) 18%,
+    rgba(255, 255, 255, 1) 37%,
+    rgba(255, 199, 199, 1) 77%,
+    rgba(242, 242, 242, 1) 100%
+  );
+  border: 1px solid #ea8c8c;
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-weight: 700;
+  font-size: 11.2px;
+  letter-spacing: 0.05em;
+  color: #111110;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* Footer */
+.footer {
+  margin-top: 36px;
+  padding-top: 14px;
+  border-top: 0.8px solid #b8b8b2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.footerText {
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  font-size: 10.9px;
+  letter-spacing: 0.06em;
+  color: #353533;
+  text-transform: uppercase;
+}
+
+/* Mobile Responsiveness (< 768px) */
+@media (max-width: 768px) {
+  .kioskContainer {
+    padding: 16px;
+  }
+
+  .gridContainer {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .programCard {
+    grid-template-columns: 140px 1fr;
+    height: auto;
+    min-height: 180px;
+  }
+
+  .posterBox {
+    width: 140px;
+    height: auto;
+    min-height: 180px;
+  }
+
+  .titleActive,
+  .titleSoldOut {
+    font-size: 26px;
+  }
+
+  .timePillActive,
+  .timePillSoldOut {
+    max-width: 100%;
+    height: 36px;
+  }
+
+  .contentBox {
+    padding: 16px 14px;
+  }
+
+  .wordmarkImage {
+    width: 300px;
+  }
+}
