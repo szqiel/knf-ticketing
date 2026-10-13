@@ -29,6 +29,7 @@ export default function HomePage() {
               width={408}
               height={171}
               priority
+              style={{ height: "auto" }}
               className={styles.wordmarkImage}
             />
           </section>
