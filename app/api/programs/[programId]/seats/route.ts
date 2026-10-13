@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSeatMap } from "@/lib/booking/service";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 const paramsSchema = z.object({ programId: z.string().uuid() });
 
 export async function GET(

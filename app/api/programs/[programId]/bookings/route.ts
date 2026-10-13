@@ -4,9 +4,6 @@ import { confirmBooking } from "@/lib/booking/service";
 import { BookingError } from "@/lib/booking/errors";
 import { bookingRequestSchema } from "@/lib/contracts";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 const paramsSchema = z.object({ programId: z.string().uuid() });
 
 export async function POST(
