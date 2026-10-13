@@ -37,7 +37,7 @@ async function SeatMapContent({ params }: SeatMapPageProps) {
     <main className={styles.page}>
       <div className={styles.stage}>
         <header className={styles.topBar}>
-          <Link className={styles.backButton} href="/">
+          <Link className={styles.backButton} href={`/p/${slug}`}>
             <span aria-hidden="true">←</span> Back
           </Link>
 

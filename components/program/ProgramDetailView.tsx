@@ -96,7 +96,7 @@ export function ProgramDetailView({ program }: ProgramDetailViewProps) {
               </button>
             ) : (
               <Link
-                href={`/p/${program.slug}#seats`}
+                href={`/p/${program.slug}/seats`}
                 className={styles.chooseSeatButton}
               >
                 Choose Seat →
