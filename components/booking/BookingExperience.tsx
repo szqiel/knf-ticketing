@@ -30,6 +30,7 @@ type BookingExperienceProps = {
 type ApiFailure = Error & { code?: string };
 const SEAT_MAP_CONNECTION_ERROR = "Seat map belum terhubung ke database program.";
 const SEAT_MAP_ACTIVE_STORAGE_KEY = "knf26.seat-map.active";
+const KIOSK_IDLE_TIMEOUT_MS = 2 * 60 * 1000;
 
 async function readApiResponse(response: Response) {
   const payload: unknown = await response.json().catch(() => null);
@@ -74,6 +75,7 @@ export function BookingExperience({
   const activeHoldRef = useRef<HoldResponse | null>(null);
   const programIdRef = useRef<string | null>(null);
   const sessionTokenRef = useRef<string | null>(null);
+  const idleResetInProgressRef = useRef(false);
 
   useEffect(() => {
     const navigationEntry = window.performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
@@ -155,6 +157,58 @@ export function BookingExperience({
     setSessionToken(null);
     window.sessionStorage.removeItem(BOOKING_SESSION_STORAGE_KEY);
   }, []);
+
+  const resetKioskToHome = useCallback(async () => {
+    if (idleResetInProgressRef.current) return;
+    idleResetInProgressRef.current = true;
+
+    const hold = activeHoldRef.current;
+    if (hold) {
+      try {
+        await releaseHold(hold);
+      } catch (error) {
+        // The database expiry remains authoritative if the best-effort release fails.
+        console.warn("Unable to release the kiosk hold before idle reset", error);
+      }
+    }
+
+    setDetailsOpen(false);
+    setSelectedSeatId(null);
+    setBookingError(null);
+    clearBookingSession();
+    window.sessionStorage.removeItem(SEAT_MAP_ACTIVE_STORAGE_KEY);
+    router.replace("/");
+  }, [clearBookingSession, releaseHold, router]);
+
+  useEffect(() => {
+    let idleTimer: number | undefined;
+
+    const armIdleTimer = () => {
+      if (idleTimer !== undefined) window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        void resetKioskToHome();
+      }, KIOSK_IDLE_TIMEOUT_MS);
+    };
+
+    const activityEvents: Array<keyof WindowEventMap> = [
+      "pointerdown",
+      "keydown",
+      "touchstart",
+      "wheel",
+    ];
+
+    activityEvents.forEach((eventName) => {
+      window.addEventListener(eventName, armIdleTimer, { passive: true });
+    });
+    armIdleTimer();
+
+    return () => {
+      if (idleTimer !== undefined) window.clearTimeout(idleTimer);
+      activityEvents.forEach((eventName) => {
+        window.removeEventListener(eventName, armIdleTimer);
+      });
+    };
+  }, [resetKioskToHome]);
 
   const holdSeatWithSession = useCallback(async (seatId: string, token: string) => {
     if (!seatMap.programId) throw new Error(SEAT_MAP_CONNECTION_ERROR);
