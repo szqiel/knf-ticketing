@@ -14,9 +14,12 @@ import styles from "./SuccessTicketRoute.module.css";
 type SuccessTicketRouteProps = {
   bookingId: string;
   slug: string;
+  programTitle: string;
+  dayLabel: string;
+  timeSlot: string;
 };
 
-export function SuccessTicketRoute({ bookingId, slug }: SuccessTicketRouteProps) {
+export function SuccessTicketRoute({ bookingId, dayLabel, programTitle, slug, timeSlot }: SuccessTicketRouteProps) {
   const router = useRouter();
   const [booking, setBooking] = useState<BookingResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,5 +65,14 @@ export function SuccessTicketRoute({ bookingId, slug }: SuccessTicketRouteProps)
     );
   }
 
-  return <SuccessTicket booking={booking} onReset={resetToHome} />;
+  return (
+    <SuccessTicket
+      backHref={`/p/${slug}`}
+      booking={booking}
+      dayLabel={dayLabel}
+      onReset={resetToHome}
+      programTitle={programTitle}
+      timeSlot={timeSlot}
+    />
+  );
 }

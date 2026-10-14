@@ -23,7 +23,15 @@ async function SuccessPageContent({ params }: SuccessPageProps) {
 
   if (!program || !uuidPattern.test(id)) notFound();
 
-  return <SuccessTicketRoute bookingId={id} slug={slug} />;
+  return (
+    <SuccessTicketRoute
+      bookingId={id}
+      dayLabel={program.dayLabel}
+      programTitle={program.title}
+      slug={slug}
+      timeSlot={program.timeSlot}
+    />
+  );
 }
 
 function SuccessPageFallback() {

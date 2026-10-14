@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   BOOKING_SESSION_STORAGE_KEY,
   bookingTicketStorageKey,
+  bookingSessionSchema,
   bookingResponseSchema,
   holdResponseSchema,
   type BookingResponse,
@@ -27,6 +28,8 @@ type BookingExperienceProps = {
 };
 
 type ApiFailure = Error & { code?: string };
+const SEAT_MAP_CONNECTION_ERROR = "Seat map belum terhubung ke database program.";
+const SEAT_MAP_ACTIVE_STORAGE_KEY = "knf26.seat-map.active";
 
 async function readApiResponse(response: Response) {
   const payload: unknown = await response.json().catch(() => null);
@@ -73,6 +76,22 @@ export function BookingExperience({
   const sessionTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
+    const navigationEntry = window.performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    const wasAlreadyOnSeatMap = window.sessionStorage.getItem(SEAT_MAP_ACTIVE_STORAGE_KEY) === "true";
+
+    if (navigationEntry?.type === "reload" && wasAlreadyOnSeatMap) {
+      window.sessionStorage.removeItem(SEAT_MAP_ACTIVE_STORAGE_KEY);
+      sessionTokenRef.current = null;
+      window.sessionStorage.removeItem(BOOKING_SESSION_STORAGE_KEY);
+      router.replace("/");
+      return;
+    }
+
+    window.sessionStorage.setItem(SEAT_MAP_ACTIVE_STORAGE_KEY, "true");
+    return () => window.sessionStorage.removeItem(SEAT_MAP_ACTIVE_STORAGE_KEY);
+  }, [router]);
+
+  useEffect(() => {
     if (initialSessionToken) {
       setSessionToken(initialSessionToken);
       window.sessionStorage.setItem(BOOKING_SESSION_STORAGE_KEY, initialSessionToken);
@@ -116,6 +135,41 @@ export function BookingExperience({
     }
   }, [seatMap.programId, sessionToken]);
 
+  const createBookingSession = useCallback(async () => {
+    const response = await fetch("/api/booking/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const payload = await readApiResponse(response);
+    const parsed = bookingSessionSchema.safeParse(payload);
+    if (!parsed.success) throw new Error("Booking session response is invalid.");
+
+    sessionTokenRef.current = parsed.data.sessionToken;
+    setSessionToken(parsed.data.sessionToken);
+    window.sessionStorage.setItem(BOOKING_SESSION_STORAGE_KEY, parsed.data.sessionToken);
+    return parsed.data.sessionToken;
+  }, []);
+
+  const clearBookingSession = useCallback(() => {
+    sessionTokenRef.current = null;
+    setSessionToken(null);
+    window.sessionStorage.removeItem(BOOKING_SESSION_STORAGE_KEY);
+  }, []);
+
+  const holdSeatWithSession = useCallback(async (seatId: string, token: string) => {
+    if (!seatMap.programId) throw new Error(SEAT_MAP_CONNECTION_ERROR);
+
+    const response = await fetch(`/api/programs/${seatMap.programId}/hold`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ seatId, sessionToken: token }),
+    });
+    const payload = await readApiResponse(response);
+    const parsed = holdResponseSchema.safeParse(payload);
+    if (!parsed.success) throw new Error("Hold response is invalid.");
+    return parsed.data;
+  }, [seatMap.programId]);
+
   useEffect(() => {
     return () => {
       const hold = activeHoldRef.current;
@@ -138,6 +192,14 @@ export function BookingExperience({
   useEffect(() => {
     if (selectedSeatId && !selectedSeat) setSelectedSeatId(null);
   }, [selectedSeat, selectedSeatId]);
+
+  useEffect(() => {
+    if (!seatMap.programId) return;
+
+    setBookingError((currentError) => (
+      currentError === SEAT_MAP_CONNECTION_ERROR ? null : currentError
+    ));
+  }, [seatMap.programId]);
 
   useEffect(() => {
     if (
@@ -193,30 +255,35 @@ export function BookingExperience({
   const handleConfirm = async () => {
     if (!selectedSeat || isHolding) return;
     if (!seatMap.programId) {
-      setBookingError("Seat map belum terhubung ke database program.");
+      setBookingError(SEAT_MAP_CONNECTION_ERROR);
       return;
     }
-    if (!sessionToken) {
-      setBookingError("Booking session belum aktif. Silakan akses halaman melalui QR festival.");
-      return;
-    }
-
     setIsHolding(true);
     setBookingError(null);
     try {
-      const response = await fetch(`/api/programs/${seatMap.programId}/hold`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ seatId: selectedSeat.id, sessionToken }),
-      });
-      const payload = await readApiResponse(response);
-      const parsed = holdResponseSchema.safeParse(payload);
-      if (!parsed.success) throw new Error("Hold response is invalid.");
+      let activeSessionToken = sessionToken ?? await createBookingSession();
+      let hold: HoldResponse;
 
-      setActiveHold(parsed.data);
+      try {
+        hold = await holdSeatWithSession(selectedSeat.id, activeSessionToken);
+      } catch (error) {
+        const failure = error as ApiFailure;
+        if (failure.code !== "SESSION_INVALID") throw error;
+
+        clearBookingSession();
+        activeSessionToken = await createBookingSession();
+        hold = await holdSeatWithSession(selectedSeat.id, activeSessionToken);
+      }
+
+      setActiveHold(hold);
       setDetailsOpen(true);
     } catch (error) {
-      setBookingError(error instanceof Error ? error.message : "Unable to hold that seat.");
+      const failure = error as ApiFailure;
+      setBookingError(
+        failure.code === "SESSION_INVALID"
+          ? "Session booking diperbarui. Silakan pilih kursi lagi."
+          : failure.message || "Unable to hold that seat.",
+      );
       await seatMap.refresh();
     } finally {
       setIsHolding(false);
@@ -283,6 +350,15 @@ export function BookingExperience({
       });
     } catch (error) {
       const failure = error as ApiFailure;
+      if (failure.code === "SESSION_INVALID") {
+        clearBookingSession();
+        setDetailsOpen(false);
+        setSelectedSeatId(null);
+        setBookingError("Session booking sudah kedaluwarsa. Silakan pilih kursi lagi.");
+        await seatMap.refresh();
+        return;
+      }
+
       setBookingError(failure.message || "Unable to confirm your booking.");
       if (failure.code === "HOLD_EXPIRED" || failure.code === "HOLD_INVALID") {
         await releaseHold(activeHold);
