@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import type { Seat } from "@/lib/contracts";
 import styles from "./SeatMap.module.css";
 
@@ -45,6 +46,7 @@ export type SeatMapProps = {
   showSwipeHint?: boolean;
   showAvailability?: boolean;
   confirmButtonState?: "auto" | "active" | "disabled";
+  summaryCountLabel?: string;
 };
 
 const defaultCopy: SeatMapCopy = {
@@ -204,6 +206,7 @@ export function SeatMap({
   showSwipeHint = true,
   showAvailability = true,
   confirmButtonState = "auto",
+  summaryCountLabel = "1 seat",
 }: SeatMapProps) {
   const copy = {
     ...defaultCopy,
@@ -213,6 +216,23 @@ export function SeatMap({
   const visuals = { ...defaultVisuals, ...visualOverrides };
   const availableCount = seats.filter((seat) => seat.status === "available").length;
   const selectedSeat = seats.find((seat) => seat.id === selectedSeatId);
+  const [summarySeat, setSummarySeat] = useState<Seat | null>(selectedSeat ?? null);
+  const [summaryVisible, setSummaryVisible] = useState(Boolean(selectedSeat));
+
+  useEffect(() => {
+    if (selectedSeat) {
+      setSummarySeat(selectedSeat);
+      const showFrame = window.requestAnimationFrame(() => setSummaryVisible(true));
+
+      return () => window.cancelAnimationFrame(showFrame);
+    }
+
+    setSummaryVisible(false);
+    const hideTimer = window.setTimeout(() => setSummarySeat(null), 180);
+
+    return () => window.clearTimeout(hideTimer);
+  }, [selectedSeat]);
+
   const confirmActive = confirmButtonState === "active"
     || (confirmButtonState === "auto" && Boolean(selectedSeat));
   const style: SeatMapStyle = {
@@ -264,21 +284,26 @@ export function SeatMap({
 
       {showLegend && <SeatLegend labels={copy.legend} />}
 
-      <aside className={styles.summaryRail} aria-live="polite">
-        <div>
-          <span className={styles.summaryLabel}>{copy.summaryLabel}</span>
-          <strong className={styles.summarySeat}>{selectedSeat?.label ?? copy.emptySeatLabel}</strong>
-        </div>
-        <span className={styles.selectedCount}>{selectedSeat ? "1 seat" : "0 seats"}</span>
-        <button
-          className={`${styles.confirmButton} ${confirmActive ? styles.confirmActive : ""}`}
-          disabled={!selectedSeat}
-          type="button"
-          onClick={onConfirm}
+      {summarySeat && (
+        <aside
+          className={`${styles.summaryRail} ${summaryVisible ? styles.summaryRailVisible : styles.summaryRailHidden}`}
+          aria-live="polite"
         >
-          {copy.confirmLabel} <span aria-hidden="true">→</span>
-        </button>
-      </aside>
+          <div>
+            <span className={styles.summaryLabel}>{copy.summaryLabel}</span>
+            <strong className={styles.summarySeat}>{summarySeat.label}</strong>
+          </div>
+          <span className={styles.selectedCount}>{summaryCountLabel}</span>
+          <button
+            className={`${styles.confirmButton} ${confirmActive ? styles.confirmActive : ""}`}
+            disabled={confirmButtonState === "disabled"}
+            type="button"
+            onClick={onConfirm}
+          >
+            {copy.confirmLabel} <span aria-hidden="true">→</span>
+          </button>
+        </aside>
+      )}
     </section>
   );
 }

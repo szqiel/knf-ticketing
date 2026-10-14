@@ -1,0 +1,49 @@
+.page {
+  align-items: center;
+  background: linear-gradient(145deg, #a6e5ff, #5379d8 55%, #b770d5);
+  color: #153b60;
+  display: flex;
+  justify-content: center;
+  min-height: 100svh;
+  padding: 1rem;
+  text-align: center;
+}
+
+.statusCard {
+  background: linear-gradient(180deg, #fff, #e8f6ff);
+  border: 3px solid rgb(255 255 255 / 90%);
+  border-radius: 1.5rem;
+  box-shadow: 0 1.25rem 3rem rgb(27 61 132 / 30%), inset 0 1px 0 #fff;
+  max-width: 34rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  width: 100%;
+}
+
+.eyebrow {
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  margin: 0;
+}
+
+.statusCard h1 {
+  font-size: clamp(1.5rem, 5vw, 2.25rem);
+  line-height: 1;
+  margin: 0.75rem 0;
+}
+
+.statusCard p:not(.eyebrow) {
+  line-height: 1.5;
+  margin: 0 0 1.25rem;
+}
+
+.backLink {
+  background: linear-gradient(180deg, #58c7ff, #1262b8);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 75%), 0 0.45rem 1rem rgb(18 98 184 / 30%);
+  color: #fff;
+  display: inline-flex;
+  font-weight: 900;
+  padding: 0.7rem 1rem;
+  text-decoration: none;
+}

@@ -15,23 +15,27 @@ export function generateStaticParams() {
 
 type SeatMapPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ session?: string | string[] }>;
 };
 
-export default function SeatMapPage({ params }: SeatMapPageProps) {
+export default function SeatMapPage({ params, searchParams }: SeatMapPageProps) {
   return (
     <Suspense fallback={<SeatMapFallback />}>
-      <SeatMapContent params={params} />
+      <SeatMapContent params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function SeatMapContent({ params }: SeatMapPageProps) {
+async function SeatMapContent({ params, searchParams }: SeatMapPageProps) {
   const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
   const program = MOCK_PROGRAMS.find((item) => item.slug === slug);
 
   if (!program) notFound();
 
   const seats = createDemoSeats({ soldOut: program.isSoldOut });
+  const sessionValue = resolvedSearchParams?.session;
+  const sessionToken = Array.isArray(sessionValue) ? sessionValue[0] : sessionValue;
 
   return (
     <main className={styles.page}>
@@ -72,6 +76,8 @@ async function SeatMapContent({ params }: SeatMapPageProps) {
 
         <BookingExperience
           seats={seats}
+          programSlug={slug}
+          sessionToken={sessionToken}
           seatMapProps={{
             copy: {
               summaryLabel: "YOUR SEATS",

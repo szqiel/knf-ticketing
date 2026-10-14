@@ -12,7 +12,13 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-export const reservationStatus = pgEnum("reservation_status", ["held", "booked"]);
+export const reservationStatus = pgEnum("reservation_status", [
+  "held",
+  "booked",
+  "expired",
+  "released",
+  "cancelled",
+]);
 export const bookingStatus = pgEnum("booking_status", ["booked", "cancelled"]);
 export const bookingSource = pgEnum("booking_source", ["kiosk", "phone"]);
 export const sessionSource = pgEnum("session_source", ["qr", "kiosk"]);
@@ -92,10 +98,12 @@ export const bookings = pgTable("booking", {
   contact: text("contact").notNull(),
   source: bookingSource("source").notNull(),
   status: bookingStatus("status").notNull().default("booked"),
+  idempotencyKey: text("idempotency_key"),
+  bookingSessionId: uuid("booking_session_id").references(() => bookingSessions.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
   cancelledReason: text("cancelled_reason"),
-});
+}, (table) => [uniqueIndex("booking_program_idempotency_key_idx").on(table.programId, table.idempotencyKey)]);
 
 export const blockedSeats = pgTable(
   "blocked_seat",
