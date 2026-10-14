@@ -48,8 +48,15 @@ export const bookingRequestSchema = z.object({
   sessionToken: z.string().min(16),
   fullName: z.string().trim().min(2).max(120),
   contact: z.string().trim().min(3).max(120),
+  idempotencyKey: z.string().trim().min(8).max(200).optional(),
 });
 export type BookingRequest = z.infer<typeof bookingRequestSchema>;
+
+export const cancelBookingRequestSchema = z.object({
+  sessionToken: z.string().min(16),
+  reason: z.string().trim().max(200).optional(),
+});
+export type CancelBookingRequest = z.infer<typeof cancelBookingRequestSchema>;
 
 export const bookingResponseSchema = z.object({
   bookingId: z.string().uuid(),

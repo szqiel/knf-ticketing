@@ -32,7 +32,7 @@ export function BookingExperience({ seats, onBookingDetails, seatMapProps }: Boo
         {...seatMapProps}
         seats={seats}
         selectedSeatId={selectedSeatId}
-        onSelectSeat={(seat) => setSelectedSeatId(seat.id)}
+        onSelectSeat={(seat) => setSelectedSeatId((currentSeatId) => currentSeatId === seat.id ? null : seat.id)}
         onConfirm={() => {
           if (!available) setNoSeatsOpen(true);
           else if (selectedSeat) setDetailsOpen(true);

@@ -41,7 +41,7 @@ export function SeatMapGallery() {
       <SeatMap
         seats={gallerySeats}
         selectedSeatId={selectedSeatId}
-        onSelectSeat={(seat) => setSelectedSeatId(seat.id)}
+        onSelectSeat={(seat) => setSelectedSeatId((currentSeatId) => currentSeatId === seat.id ? null : seat.id)}
         onConfirm={() => undefined}
         copy={{
           summaryLabel: "YOUR SEATS",

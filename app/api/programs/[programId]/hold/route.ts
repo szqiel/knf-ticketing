@@ -1,18 +1,17 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { holdSeat, releaseHold } from "@/lib/booking/service";
-import { BookingError } from "@/lib/booking/errors";
+import { BookingError, bookingErrorStatus } from "@/lib/booking/errors";
 import { holdRequestSchema } from "@/lib/contracts";
 
 const paramsSchema = z.object({ programId: z.string().uuid() });
 
 function errorResponse(error: unknown) {
   if (error instanceof BookingError) {
-    const status = error.code === "SEAT_UNAVAILABLE" || error.code === "SEAT_BLOCKED" ? 409 : 400;
-    return NextResponse.json({ error: error.message, code: error.code }, { status });
+    return NextResponse.json({ error: error.message, code: error.code }, { status: bookingErrorStatus(error.code) });
   }
   console.error("Booking hold request failed", error);
-  return NextResponse.json({ error: "Unable to reserve that seat right now." }, { status: 503 });
+  return NextResponse.json({ error: "Unable to reserve that seat right now.", code: "HOLD_UNAVAILABLE" }, { status: 503 });
 }
 
 export async function POST(

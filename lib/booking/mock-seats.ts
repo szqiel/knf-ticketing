@@ -5,7 +5,13 @@ type DemoSeatOptions = {
   soldOut?: boolean;
 };
 
-const DEMO_HELD_UNTIL = "2026-10-14T03:00:00.000Z";
+// The cinema layout consumes the fixture sequentially by section. The first
+// three rows of the front-center group map to D13-E3, E4-E15, and E16-F8.
+function isCinemaFrontUnavailable(rowName: string, number: number) {
+  return (rowName === "D" && number >= 13)
+    || rowName === "E"
+    || (rowName === "F" && number <= 8);
+}
 
 /**
  * Temporary visual fixture only. Replace with the venue's canonical seat
@@ -21,10 +27,7 @@ export function createDemoSeats({ rowCount = 25, soldOut = false }: DemoSeatOpti
       const block = number <= 6 ? "LEFT" : number >= 15 ? "RIGHT" : "CENTER";
       const status: SeatStatus = soldOut
         ? number % 5 === 0 ? "blocked" : "booked"
-        : rowIndex === 0 && number === 2 ? "held"
-          : rowIndex === 1 && number === 4 ? "booked"
-            : rowIndex === 2 && number === 6 ? "blocked"
-              : "available";
+        : isCinemaFrontUnavailable(rowName, number) ? "blocked" : "available";
 
       return {
         id: `demo-${rowName}-${number}`,
@@ -36,7 +39,7 @@ export function createDemoSeats({ rowCount = 25, soldOut = false }: DemoSeatOpti
         y: rowIndex * 44,
         rotation: 0,
         status,
-        heldUntil: status === "held" ? DEMO_HELD_UNTIL : null,
+        heldUntil: null,
       };
     });
   }).flat();
