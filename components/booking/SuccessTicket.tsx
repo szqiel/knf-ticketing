@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import type { BookingResponse } from "@/lib/contracts";
 import styles from "./SuccessTicket.module.css";
 
@@ -12,34 +11,15 @@ type SuccessTicketProps = {
   dayLabel: string;
   programTitle: string;
   timeSlot: string;
-  onReset?: () => void;
 };
 
 export function SuccessTicket({
   backHref,
   booking,
   dayLabel,
-  onReset,
   programTitle,
   timeSlot,
 }: SuccessTicketProps) {
-  const [secondsLeft, setSecondsLeft] = useState(10);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setSecondsLeft((seconds) => {
-        if (seconds <= 1) {
-          window.clearInterval(timer);
-          onReset?.();
-          return 0;
-        }
-        return seconds - 1;
-      });
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [onReset]);
-
   return (
     <main className={styles.page} aria-live="polite">
       <div className={styles.canvas}>
@@ -111,15 +91,6 @@ export function SuccessTicket({
           </section>
         </section>
 
-        <section className={styles.resetBar} aria-label={`${secondsLeft} seconds remaining`}>
-          <div className={styles.resetCopy}>
-            <strong>Returning to Home in {secondsLeft} seconds</strong>
-            <span>This kiosk will reset automatically</span>
-          </div>
-          <div className={styles.progressTrack}>
-            <span style={{ width: `${(secondsLeft / 10) * 100}%` }} />
-          </div>
-        </section>
       </div>
     </main>
   );

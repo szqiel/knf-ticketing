@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   bookingResponseSchema,
@@ -20,7 +19,6 @@ type SuccessTicketRouteProps = {
 };
 
 export function SuccessTicketRoute({ bookingId, dayLabel, programTitle, slug, timeSlot }: SuccessTicketRouteProps) {
-  const router = useRouter();
   const [booking, setBooking] = useState<BookingResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -38,11 +36,6 @@ export function SuccessTicketRoute({ bookingId, dayLabel, programTitle, slug, ti
       setIsLoading(false);
     }
   }, [bookingId]);
-
-  const resetToHome = () => {
-    window.sessionStorage.removeItem(bookingTicketStorageKey(bookingId));
-    router.replace("/");
-  };
 
   if (isLoading) {
     return (
@@ -70,7 +63,6 @@ export function SuccessTicketRoute({ bookingId, dayLabel, programTitle, slug, ti
       backHref={`/p/${slug}`}
       booking={booking}
       dayLabel={dayLabel}
-      onReset={resetToHome}
       programTitle={programTitle}
       timeSlot={timeSlot}
     />

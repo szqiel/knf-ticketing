@@ -398,7 +398,6 @@ export function BookingExperience({
         seatLabel={selectedSeat?.label ?? null}
         onClose={closeDetails}
         onSubmit={submitDetails}
-        expiresInSeconds={secondsRemaining}
         error={bookingError}
         isSubmitting={isSubmitting}
       />
