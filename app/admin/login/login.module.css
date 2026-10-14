@@ -1,0 +1,30 @@
+.page {
+  align-items: center;
+  background: linear-gradient(145deg, #d8f4ff, #efffc1 50%, #a9eeff);
+  display: flex;
+  min-height: 100vh;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.card {
+  background: rgb(255 255 255 / 82%);
+  border: 2px solid #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 1rem 2rem rgb(0 63 130 / 20%);
+  color: #062277;
+  display: grid;
+  gap: 0.7rem;
+  max-width: 25rem;
+  padding: 2.2rem;
+  width: 100%;
+}
+
+.eyebrow { font-size: 0.75rem; font-weight: 900; letter-spacing: 0.16em; margin: 0; }
+.card h1 { font-size: 2.2rem; margin: 0; }
+.card p { margin: 0; }
+.card label { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; margin-top: 1rem; text-transform: uppercase; }
+.card input { border: 2px solid #fff; border-radius: 0.9rem; color: #062277; font: inherit; padding: 0.85rem 1rem; }
+.card button { background: linear-gradient(180deg, #4cc6ff, #1262b8); border: 2px solid #fff; border-radius: 999px; color: #fff; cursor: pointer; font: inherit; font-weight: 900; margin-top: 0.8rem; padding: 0.9rem 1.2rem; }
+.card button:disabled { cursor: wait; opacity: 0.65; }
+.error { color: #a11d32; font-weight: 700; }
