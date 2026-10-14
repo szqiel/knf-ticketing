@@ -19,7 +19,7 @@ export function LineupHeader({ filmCount }: LineupHeaderProps) {
       {/* 1. "Film line-up" SVG (Node #102:254) */}
       <div className={styles.titleContainer}>
         <svg
-          viewBox="0 0 320 56"
+          viewBox="0 0 280 52"
           className={styles.titleSvg}
           role="img"
           aria-label="Film line-up"
@@ -30,7 +30,7 @@ export function LineupHeader({ filmCount }: LineupHeaderProps) {
               <stop offset="100%" stopColor="#FFFFFF" />
             </linearGradient>
 
-            <filter id={dropShadowId} x="-20%" y="-20%" width="140%" height="140%">
+            <filter id={dropShadowId} x="-20%" y="-20%" width="150%" height="150%">
               <feDropShadow
                 dx="-3"
                 dy="1"
@@ -43,7 +43,7 @@ export function LineupHeader({ filmCount }: LineupHeaderProps) {
 
           <text
             x="4"
-            y="42"
+            y="38"
             fill={`url(#${yellowGradId})`}
             stroke="#000A69"
             strokeWidth="1.2"
@@ -59,14 +59,15 @@ export function LineupHeader({ filmCount }: LineupHeaderProps) {
       {/* 2. "10 SHORT FILMS" SVG (Node #102:256) */}
       <div className={styles.badgeContainer}>
         <svg
-          viewBox="0 0 280 42"
+          viewBox="0 0 280 52"
           className={styles.badgeSvg}
           role="img"
           aria-label={`${filmCount} SHORT FILMS`}
         >
           <text
-            x="4"
-            y="32"
+            x="276"
+            y="38"
+            textAnchor="end"
             fill={`url(#${yellowGradId})`}
             stroke="#000A69"
             strokeWidth="1.2"

@@ -7,7 +7,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  padding: 24px 8px 16px 8px;
+  padding: 28px 0 16px 0;
   width: 100%;
   box-sizing: border-box;
 }
@@ -30,7 +30,7 @@
   font-stretch: condensed;
   font-style: italic;
   font-weight: 700;
-  font-size: 48px;
+  font-size: 46px;
   letter-spacing: -0.025em;
   user-select: none;
 }
@@ -38,12 +38,13 @@
 .badgeContainer {
   display: flex;
   align-items: flex-end;
+  justify-content: flex-end;
 }
 
 .badgeSvg {
-  width: 240px;
+  width: 280px;
   max-width: 100%;
-  height: 38px;
+  height: 52px;
   overflow: visible;
   display: block;
 }
@@ -53,7 +54,7 @@
   font-stretch: condensed;
   font-style: italic;
   font-weight: 700;
-  font-size: 32px;
+  font-size: 34px;
   letter-spacing: -0.037em;
   user-select: none;
 }
@@ -61,19 +62,19 @@
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
   .headerWrapper {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 16px 4px 12px 4px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 20px 0 12px 0;
   }
 
   .titleSvg {
-    width: 220px;
-    height: 42px;
+    width: 175px;
+    height: 36px;
   }
 
   .badgeSvg {
-    width: 180px;
-    height: 30px;
+    width: 165px;
+    height: 36px;
   }
 }
