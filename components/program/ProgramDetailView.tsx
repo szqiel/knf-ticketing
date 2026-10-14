@@ -6,6 +6,8 @@ import Link from "next/link";
 import styles from "./ProgramDetailView.module.css";
 import type { Film, Program } from "@/lib/data/mock-programs";
 import { FilmDetailModal } from "./FilmDetailModal";
+import { ProgramHeroTitle } from "./ProgramHeroTitle";
+import { LineupHeader } from "./LineupHeader";
 
 interface ProgramDetailViewProps {
   program: Program;
@@ -57,7 +59,7 @@ export function ProgramDetailView({ program }: ProgramDetailViewProps) {
                 src={program.posterUrl}
                 alt={program.title}
                 fill
-                sizes="266px"
+                sizes="(max-width: 768px) 100vw, 266px"
                 style={{ objectFit: "cover" }}
               />
             ) : (
@@ -71,8 +73,12 @@ export function ProgramDetailView({ program }: ProgramDetailViewProps) {
 
           {/* Center Info */}
           <div className={styles.bannerInfo}>
-            <p className={styles.programSubtitleLabel}>Festival Programs</p>
-            <h1 className={styles.bannerTitle}>{program.title}</h1>
+            <ProgramHeroTitle
+              title={program.title}
+              subtitle={program.subtitle}
+              isSoldOut={program.isSoldOut}
+            />
+
             <p className={styles.programDescription}>
               {program.description ??
                 "Program pemutaran film-film pendek pilihan karya sineas muda berbakat yang menghadirkan ragam perspektif dan kepekaan visual yang segar."}
@@ -84,7 +90,7 @@ export function ProgramDetailView({ program }: ProgramDetailViewProps) {
             </div>
           </div>
 
-          {/* Right Action */}
+          {/* Right Action Box */}
           <div className={styles.bannerAction}>
             <div className={styles.statusBadge}>
               {program.isSoldOut ? "SOLD OUT" : `${program.seatsLeft} SEATS LEFT`}
@@ -106,10 +112,7 @@ export function ProgramDetailView({ program }: ProgramDetailViewProps) {
         </section>
 
         {/* Section Divider / Line-up Header */}
-        <section className={styles.lineupHeader} aria-label="Header Lineup Film">
-          <h2 className={styles.lineupTitle}>Film line-up</h2>
-          <span className={styles.lineupCount}>{filmCount} SHORT FILMS</span>
-        </section>
+        <LineupHeader filmCount={filmCount} />
 
         {/* 3-Column Movie Cards Grid */}
         <section className={styles.movieGrid} aria-label="Daftar Film Pendek">

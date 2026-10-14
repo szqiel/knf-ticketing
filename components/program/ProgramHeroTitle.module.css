@@ -1,0 +1,52 @@
+/* ==========================================================================
+   PROGRAM HERO TITLE
+   Renders Festival Programs & Program Title matching Figma #104:373 & #104:369
+   ========================================================================== */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+}
+
+.titleSvg {
+  width: 100%;
+  max-width: 540px;
+  overflow: visible;
+  display: block;
+}
+
+/* Festival Programs typography (Node #104:373) */
+.festivalText {
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-stretch: condensed;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 34px;
+  letter-spacing: -0.07em;
+  user-select: none;
+}
+
+/* Program Title typography (Node #104:369) */
+.programTitleText {
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-stretch: condensed;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 56px;
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+
+/* Subtitle */
+.subtitleText {
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-stretch: condensed;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: 0;
+  user-select: none;
+}

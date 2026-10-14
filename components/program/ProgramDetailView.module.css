@@ -1,6 +1,6 @@
 /* ==========================================================================
    PROGRAM DETAIL & FILM LINE-UP (Screen 2 / Figma Node #102:203)
-   Exact Frutiger Aero Styling
+   Exact Frutiger Aero Styling & Fully Fluid Responsive Layout
    ========================================================================== */
 
 .pageWrapper {
@@ -17,7 +17,7 @@
   color: #000a69;
 }
 
-/* Semi-transparent blue glass kiosk container matching Figma node #102:205 */
+/* Kiosk Card matching Figma node #102:205 */
 .kioskCard {
   width: 100%;
   max-width: 1195px;
@@ -69,6 +69,7 @@
   color: #111110;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.15s ease, filter 0.15s ease;
+  flex-shrink: 0;
 }
 
 .backButton:hover {
@@ -128,12 +129,16 @@
   height: 46px;
   object-fit: contain;
   filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.31));
+  flex-shrink: 0;
 }
 
-/* Hero Program Banner Card */
+/* ==========================================================================
+   Hero Program Banner Card (Node #102:222)
+   Responsive grid preventing any overlap across all viewports
+   ========================================================================== */
 .heroBanner {
   display: grid;
-  grid-template-columns: 266px 1fr 221px;
+  grid-template-columns: 266px minmax(0, 1fr) 220px;
   gap: 24px;
   padding: 28px 24px;
   border-radius: 33px;
@@ -147,6 +152,8 @@
   border: 1px solid rgba(0, 0, 0, 0.12);
   box-shadow: -2px 0px 11.4px 0px rgba(0, 0, 0, 0.44);
   align-items: center;
+  box-sizing: border-box;
+  width: 100%;
   margin-bottom: 24px;
 }
 
@@ -154,6 +161,7 @@
 .bannerPoster {
   width: 266px;
   height: 260px;
+  max-width: 100%;
   border-radius: 20px;
   background: linear-gradient(
     180deg,
@@ -167,6 +175,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .crossLine1,
@@ -215,42 +224,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
-}
-
-.programSubtitleLabel {
-  font-family: "Arial Narrow", Arial, sans-serif;
-  font-style: italic;
-  font-weight: 400;
-  font-size: 32px;
-  line-height: 1.1;
-  letter-spacing: -0.07em;
-  color: #ffffff;
-  text-shadow: 0px 2px 4.5px rgba(0, 10, 105, 1);
-  margin: 0;
-}
-
-.bannerTitle {
-  font-family: "Arial Narrow", Arial, sans-serif;
-  font-style: italic;
-  font-weight: 700;
-  font-size: 58px;
-  line-height: 1.05;
-  background: linear-gradient(
-    180deg,
-    #0015cf 16%,
-    #8793ff 40%,
-    #0418ce 44%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 1px 0 #0015cf)
-    drop-shadow(0 4px 4px rgba(141, 185, 255, 0.9));
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .programDescription {
@@ -276,6 +251,7 @@
     rgba(255, 255, 255, 0.76) 100%
   );
   box-shadow: inset 0px 0px 4px 0px rgba(0, 10, 105, 1);
+  box-sizing: border-box;
 }
 
 .dayLabel {
@@ -285,6 +261,7 @@
   font-size: 12.5px;
   color: #000a69;
   width: 65px;
+  flex-shrink: 0;
 }
 
 .timeLabel {
@@ -300,6 +277,7 @@
   flex-direction: column;
   justify-content: flex-end;
   gap: 14px;
+  flex-shrink: 0;
 }
 
 .statusBadge {
@@ -323,37 +301,51 @@
   letter-spacing: 0.05em;
   color: #111110;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
+/* Choose Seat Button (Exact 1:1 match to Figma node #102:248) */
 .chooseSeatButton {
-  height: 52px;
-  border-radius: 52px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 24px;
-  background: linear-gradient(
-    180deg,
-    rgba(175, 183, 255, 1) 2%,
-    rgba(65, 84, 255, 1) 28%,
-    rgba(80, 97, 255, 1) 64%,
-    rgba(128, 140, 255, 1) 99%
-  );
-  border: 3px solid #0011ad;
+  height: 52px;
+  padding: 0 28px;
+  border-radius: 52px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(175, 183, 255, 1) 2%,
+      rgba(65, 84, 255, 1) 28%,
+      rgba(80, 97, 255, 1) 64%,
+      rgba(128, 140, 255, 1) 99%
+    ) padding-box,
+    linear-gradient(
+      180deg,
+      rgba(0, 17, 173, 1) 0%,
+      rgba(207, 212, 253, 1) 0%,
+      rgba(2, 22, 207, 1) 8%,
+      rgba(1, 22, 207, 1) 62%,
+      rgba(239, 241, 255, 1) 87%,
+      rgba(0, 21, 207, 1) 100%
+    ) border-box;
+  border: 3px solid transparent;
   box-shadow: 0px 3px 7.5px 0px rgba(0, 10, 105, 0.63);
   font-family: Arial, "Arial Black", sans-serif;
   font-weight: 900;
-  font-size: 15px;
+  font-size: 16px;
+  line-height: 24px;
   color: #ffffff;
-  letter-spacing: 0.02em;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 0.15s ease, filter 0.15s ease;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
 }
 
 .chooseSeatButton:hover {
   transform: translateY(-2px);
   filter: brightness(1.08);
+  box-shadow: 0px 6px 12px 0px rgba(0, 10, 105, 0.7);
 }
 
 .chooseSeatButton:active {
@@ -374,45 +366,12 @@
   font-weight: 900;
   font-size: 15px;
   cursor: not-allowed;
+  white-space: nowrap;
 }
 
-/* Subheader Section */
-.lineupHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 24px 12px 18px 12px;
-}
-
-.lineupTitle {
-  font-family: "Arial Narrow", Arial, sans-serif;
-  font-style: italic;
-  font-weight: 700;
-  font-size: 46px;
-  line-height: 1;
-  letter-spacing: -0.025em;
-  background: linear-gradient(0deg, #ffff00 0%, #ffffff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(-3px 1px 0px #000a69) drop-shadow(0 1px 0 #000a69);
-  margin: 0;
-}
-
-.lineupCount {
-  font-family: "Arial Narrow", Arial, sans-serif;
-  font-style: italic;
-  font-weight: 700;
-  font-size: 30px;
-  line-height: 1;
-  letter-spacing: -0.037em;
-  background: linear-gradient(0deg, #ffff00 0%, #ffffff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(-3px 1px 0px #000a69) drop-shadow(0 1px 0 #000a69);
-  margin: 0;
-}
-
-/* 3-Column Movie Cards Grid */
+/* ==========================================================================
+   3-Column Movie Cards Grid
+   ========================================================================== */
 .movieGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -538,14 +497,24 @@
   border-radius: 52px;
   align-self: flex-start;
   padding: 0 20px;
-  background: linear-gradient(
-    180deg,
-    #afb7ff 2%,
-    #4154ff 28%,
-    #5061ff 64%,
-    #808cff 99%
-  );
-  border: 2px solid #0011ad;
+  background:
+    linear-gradient(
+      180deg,
+      #afb7ff 2%,
+      #4154ff 28%,
+      #5061ff 64%,
+      #808cff 99%
+    ) padding-box,
+    linear-gradient(
+      180deg,
+      #0011ad 0%,
+      #cfd4fd 0%,
+      #0216cf 8%,
+      #0116cf 62%,
+      #eff1ff 87%,
+      #0015cf 100%
+    ) border-box;
+  border: 2px solid transparent;
   box-shadow: 0px 3px 7.5px 0px rgba(0, 10, 105, 0.63);
   font-family: "Arial Narrow", Arial, sans-serif;
   font-weight: 700;
@@ -569,78 +538,95 @@
   transform: scale(0.97);
 }
 
-/* Responsive Breakpoints */
-@media (max-width: 1100px) {
+/* ==========================================================================
+   Responsive Breakpoints
+   Smoothly adapts without any element collisions
+   ========================================================================== */
+
+/* Tablet / Medium Screens (<= 1150px down to 769px) */
+@media (max-width: 1150px) {
   .heroBanner {
-    grid-template-columns: 240px 1fr;
-    grid-template-rows: auto auto;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 20px;
+    padding: 24px 20px;
+  }
+
+  .bannerPoster {
+    width: 240px;
+    height: 240px;
   }
 
   .bannerAction {
-    grid-column: 1 / -1;
+    grid-column: 2;
     flex-direction: row;
-    justify-content: space-between;
     align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    margin-top: 10px;
   }
 
   .movieGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
   }
 }
 
+/* Mobile Screens (<= 768px) */
 @media (max-width: 768px) {
+  .kioskCard {
+    padding: 16px;
+  }
+
   .header {
     height: auto;
     gap: 12px;
     flex-wrap: wrap;
+    margin-bottom: 16px;
   }
 
   .progressStepper {
     order: 3;
     width: 100%;
-    margin-top: 8px;
+    margin-top: 6px;
   }
 
   .heroBanner {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
     padding: 20px 16px;
   }
 
   .bannerPoster {
     width: 100%;
-    height: 200px;
+    max-width: 280px;
+    height: 220px;
+    margin: 0 auto;
   }
 
-  .bannerTitle {
-    font-size: 40px;
-    white-space: normal;
+  .bannerInfo {
+    width: 100%;
   }
 
-  .programSubtitleLabel {
-    font-size: 24px;
+  .timePill {
+    max-width: 100%;
   }
 
   .bannerAction {
+    width: 100%;
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
 
-  .lineupHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .lineupTitle {
-    font-size: 36px;
-  }
-
-  .lineupCount {
-    font-size: 22px;
+  .chooseSeatButton,
+  .chooseSeatDisabled {
+    width: 100%;
   }
 
   .movieGrid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
