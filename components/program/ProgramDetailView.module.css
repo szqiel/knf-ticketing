@@ -8,11 +8,11 @@
   width: 100%;
   background-color: #eaeff7;
   background-image:
-    url("/assets/Program%20Detail%20%26%20Film%20Line-Up%20bg.png"),
+    url("/assets/program-bg-clean.png"),
     linear-gradient(
       180deg,
       rgba(223, 237, 255, 1) 0%,
-      rgba(234, 239, 247, 1) 55%,
+      rgba(234, 239, 247, 1) 50%,
       rgba(223, 227, 255, 1) 100%
     );
   background-size: cover;
@@ -25,20 +25,15 @@
   color: #000a69;
 }
 
-/* Kiosk Card matching Figma node #102:205 */
+/* Center Content Container - Seamless with full page background, no dividing card lines */
 .kioskCard {
   width: 100%;
-  max-width: 1195px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 28px;
+  padding: 28px 24px;
   box-sizing: border-box;
-  background: linear-gradient(
-    180deg,
-    rgba(223, 237, 255, 1) 0%,
-    rgba(234, 239, 247, 1) 55%,
-    rgba(223, 227, 255, 1) 100%
-  );
-  box-shadow: 0px 10px 24px 0px rgba(0, 0, 0, 0.08);
+  background: transparent;
+  box-shadow: none;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
