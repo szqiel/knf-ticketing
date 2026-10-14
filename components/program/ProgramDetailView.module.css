@@ -6,7 +6,15 @@
 .pageWrapper {
   min-height: 100vh;
   width: 100%;
-  background-image: url("/assets/program-bg.png");
+  background-color: #eaeff7;
+  background-image:
+    url("/assets/Program%20Detail%20%26%20Film%20Line-Up%20bg.png"),
+    linear-gradient(
+      180deg,
+      rgba(223, 237, 255, 1) 0%,
+      rgba(234, 239, 247, 1) 55%,
+      rgba(223, 227, 255, 1) 100%
+    );
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
