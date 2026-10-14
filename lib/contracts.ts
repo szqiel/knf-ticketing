@@ -27,6 +27,7 @@ export type SeatMapResponse = z.infer<typeof seatMapResponseSchema>;
 export const bookingSessionSchema = z.object({
   sessionToken: z.string().min(16),
 });
+export const BOOKING_SESSION_STORAGE_KEY = "knf26.booking.session";
 
 export const holdRequestSchema = z.object({
   seatId: z.string().min(1),

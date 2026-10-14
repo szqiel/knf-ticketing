@@ -46,6 +46,7 @@ export type SeatMapProps = {
   showSwipeHint?: boolean;
   showAvailability?: boolean;
   confirmButtonState?: "auto" | "active" | "disabled";
+  summaryCountLabel?: string;
 };
 
 const defaultCopy: SeatMapCopy = {
@@ -205,6 +206,7 @@ export function SeatMap({
   showSwipeHint = true,
   showAvailability = true,
   confirmButtonState = "auto",
+  summaryCountLabel = "1 seat",
 }: SeatMapProps) {
   const copy = {
     ...defaultCopy,
@@ -291,9 +293,10 @@ export function SeatMap({
             <span className={styles.summaryLabel}>{copy.summaryLabel}</span>
             <strong className={styles.summarySeat}>{summarySeat.label}</strong>
           </div>
-          <span className={styles.selectedCount}>1 seat</span>
+          <span className={styles.selectedCount}>{summaryCountLabel}</span>
           <button
             className={`${styles.confirmButton} ${confirmActive ? styles.confirmActive : ""}`}
+            disabled={confirmButtonState === "disabled"}
             type="button"
             onClick={onConfirm}
           >

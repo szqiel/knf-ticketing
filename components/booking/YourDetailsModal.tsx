@@ -12,10 +12,21 @@ type YourDetailsModalProps = {
   open: boolean;
   seatLabel: string | null;
   onClose: () => void;
-  onSubmit: (details: BookingDetails) => void;
+  onSubmit: (details: BookingDetails) => void | Promise<void>;
+  expiresInSeconds?: number | null;
+  error?: string | null;
+  isSubmitting?: boolean;
 };
 
-export function YourDetailsModal({ open, seatLabel, onClose, onSubmit }: YourDetailsModalProps) {
+export function YourDetailsModal({
+  open,
+  seatLabel,
+  onClose,
+  onSubmit,
+  expiresInSeconds,
+  error,
+  isSubmitting = false,
+}: YourDetailsModalProps) {
   const [fullName, setFullName] = useState("");
   const [contact, setContact] = useState("");
 
@@ -28,6 +39,12 @@ export function YourDetailsModal({ open, seatLabel, onClose, onSubmit }: YourDet
         <p className={styles.eyebrow}>SEAT {seatLabel ?? "—"}</p>
         <h2 id="details-title" className={styles.title}>Your details</h2>
         <p className={styles.description}>Isi data ini untuk menyelesaikan reservasi gratis kamu.</p>
+        {expiresInSeconds !== null && expiresInSeconds !== undefined && (
+          <p className={styles.holdTimer} role="status">
+            Seat held for {Math.floor(expiresInSeconds / 60)}:{String(expiresInSeconds % 60).padStart(2, "0")}
+          </p>
+        )}
+        {error && <p className={styles.formError} role="alert">{error}</p>}
 
         <form className={styles.form} onSubmit={(event) => {
           event.preventDefault();
@@ -41,7 +58,9 @@ export function YourDetailsModal({ open, seatLabel, onClose, onSubmit }: YourDet
             <span>INSTAGRAM/PHONE NUMBER *</span>
             <input required minLength={3} maxLength={120} value={contact} onChange={(event) => setContact(event.target.value)} />
           </label>
-          <button className={styles.submitButton} type="submit">Confirm Booking <span aria-hidden="true">→</span></button>
+          <button className={styles.submitButton} type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving…" : "Confirm Booking"} <span aria-hidden="true">→</span>
+          </button>
         </form>
       </section>
     </div>

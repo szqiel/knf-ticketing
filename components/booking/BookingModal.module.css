@@ -56,6 +56,23 @@
   margin: 0 0 1.25rem;
 }
 
+.holdTimer {
+  color: #1262b8;
+  font-size: 0.85rem;
+  font-weight: 900;
+  margin: -0.5rem 0 1rem;
+}
+
+.formError {
+  background: rgb(255 235 235 / 78%);
+  border: 1px solid #d66767;
+  border-radius: 0.65rem;
+  color: #8b1e1e;
+  font-size: 0.82rem;
+  margin: -0.35rem 0 1rem;
+  padding: 0.65rem 0.75rem;
+}
+
 .form {
   display: grid;
   gap: 1rem;
@@ -99,4 +116,10 @@
   margin-top: 0.35rem;
   min-height: 2.8rem;
   padding: 0.7rem 1rem;
+}
+
+.submitButton:disabled {
+  cursor: wait;
+  filter: grayscale(0.45);
+  opacity: 0.72;
 }
