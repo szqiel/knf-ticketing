@@ -72,6 +72,7 @@ async function SeatMapContent({ params }: SeatMapPageProps) {
 
         <BookingExperience
           seats={seats}
+          programSlug={slug}
           seatMapProps={{
             copy: {
               summaryLabel: "YOUR SEATS",

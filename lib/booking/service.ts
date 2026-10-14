@@ -192,6 +192,17 @@ export async function getSeatMap(programId: string) {
   };
 }
 
+export async function getSeatMapBySlug(slug: string) {
+  const [program] = await getDb()
+    .select({ id: programs.id })
+    .from(programs)
+    .where(eq(programs.slug, slug))
+    .limit(1);
+
+  if (!program) throw new BookingError("That program does not exist.", "PROGRAM_NOT_FOUND");
+  return getSeatMap(program.id);
+}
+
 export async function holdSeat(programId: string, seatId: string, sessionToken: string) {
   await assertBookingSession(sessionToken);
   const db = getDb();

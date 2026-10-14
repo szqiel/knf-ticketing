@@ -1,5 +1,6 @@
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
+import { MOCK_PROGRAMS } from "../lib/data/mock-programs";
 import { films, programs, seats } from "../lib/db/schema";
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -10,17 +11,17 @@ if (!databaseUrl) {
 const sql = postgres(databaseUrl, { max: 1 });
 const db = drizzle(sql);
 
-const programRows = Array.from({ length: 8 }, (_, index) => ({
-  slug: `knf26-program-${index + 1}`,
-  title: `KNF26 Program ${index + 1}`,
-  subtitle: "Program title to be edited in Content Admin",
-  description: "Seed record for the KNF26 ticketing system.",
+const programRows = MOCK_PROGRAMS.map((program, index) => ({
+  slug: program.slug,
+  title: program.title,
+  subtitle: program.subtitle ?? null,
+  description: program.description ?? null,
   showDate: index < 4 ? "2026-11-07" : "2026-11-08",
   startsAt: `${String(10 + (index % 4) * 2).padStart(2, "0")}:00:00`,
   endsAt: `${String(12 + (index % 4) * 2).padStart(2, "0")}:00:00`,
-  dayLabel: index < 4 ? "DAY 1" : "DAY 2",
+  dayLabel: program.dayLabel,
   sortOrder: index,
-  isPublished: false,
+  isPublished: true,
   bookingOpen: false,
 }));
 
