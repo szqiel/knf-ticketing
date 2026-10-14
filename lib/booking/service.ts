@@ -11,6 +11,7 @@ import {
 } from "@/lib/db/schema";
 import { BookingError } from "./errors";
 import { assertBookingSession } from "./sessions";
+import { isCinemaFrontUnavailable } from "./seat-layout";
 
 const HOLD_TTL_MS = 3 * 60 * 1000;
 
@@ -180,7 +181,9 @@ export async function getSeatMap(programId: string) {
       const activeStatus = reservation?.status === "held" || reservation?.status === "booked"
         ? reservation.status
         : undefined;
-      const status = blockedSeatIds.has(seat.id) ? "blocked" : activeStatus ?? "available";
+      const status = blockedSeatIds.has(seat.id) || isCinemaFrontUnavailable(seat.rowName, seat.number)
+        ? "blocked"
+        : activeStatus ?? "available";
 
       return {
         ...seat,
@@ -222,6 +225,10 @@ export async function holdSeat(programId: string, seatId: string, sessionToken: 
 
       const [seat] = await tx.select().from(seats).where(eq(seats.id, seatId)).limit(1);
       if (!seat) throw new BookingError("That seat does not exist.", "SEAT_NOT_FOUND");
+
+      if (isCinemaFrontUnavailable(seat.rowName, seat.number)) {
+        throw new BookingError("That seat is unavailable.", "SEAT_BLOCKED");
+      }
 
       const [blocked] = await tx
         .select({ id: blockedSeats.id })

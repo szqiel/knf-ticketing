@@ -1,7 +1,8 @@
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { MOCK_PROGRAMS } from "../lib/data/mock-programs";
-import { films, programs, seats } from "../lib/db/schema";
+import { isCinemaFrontUnavailable } from "../lib/booking/seat-layout";
+import { blockedSeats, films, programs, seats } from "../lib/db/schema";
 
 async function seed() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -68,7 +69,24 @@ async function seed() {
     }
     await db.insert(seats).values(seatRows).onConflictDoNothing();
 
-    console.log(`Seeded ${insertedPrograms.length} programs, ${filmRows.length} films, and ${seatRows.length} seats.`);
+    const seededPrograms = await db.select({ id: programs.id }).from(programs);
+    const blockedSeatRows = seededPrograms.flatMap((program) =>
+      seatRows
+        .filter((seat) => isCinemaFrontUnavailable(seat.rowName, seat.number))
+        .map((seat) => ({
+          programId: program.id,
+          seatId: seat.id,
+          reason: "Front-center row unavailable",
+        })),
+    );
+
+    if (blockedSeatRows.length > 0) {
+      await db.insert(blockedSeats).values(blockedSeatRows).onConflictDoNothing();
+    }
+
+    console.log(
+      `Seeded ${insertedPrograms.length} programs, ${filmRows.length} films, ${seatRows.length} seats, and ${blockedSeatRows.length} blocked-seat mappings.`,
+    );
   } finally {
     await sql.end();
   }

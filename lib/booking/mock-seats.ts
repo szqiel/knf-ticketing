@@ -1,17 +1,10 @@
 import type { Seat, SeatStatus } from "@/lib/contracts";
+import { isCinemaFrontUnavailable } from "./seat-layout";
 
 type DemoSeatOptions = {
   rowCount?: number;
   soldOut?: boolean;
 };
-
-// The cinema layout consumes the fixture sequentially by section. The first
-// three rows of the front-center group map to D13-E3, E4-E15, and E16-F8.
-function isCinemaFrontUnavailable(rowName: string, number: number) {
-  return (rowName === "D" && number >= 13)
-    || rowName === "E"
-    || (rowName === "F" && number <= 8);
-}
 
 /**
  * Temporary visual fixture only. Replace with the venue's canonical seat
