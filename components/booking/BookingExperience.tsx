@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   BOOKING_SESSION_STORAGE_KEY,
+  bookingTicketStorageKey,
   bookingResponseSchema,
   holdResponseSchema,
   type BookingResponse,
@@ -55,6 +57,7 @@ export function BookingExperience({
   seatMapProps,
 }: BookingExperienceProps) {
   const seatMap = useSeatMapData({ programSlug, initialSeats });
+  const router = useRouter();
   const seats = seatMap.seats;
   const [sessionToken, setSessionToken] = useState<string | null>(initialSessionToken ?? null);
   const [selectedSeatId, setSelectedSeatId] = useState<string | null>(null);
@@ -234,6 +237,10 @@ export function BookingExperience({
       const parsed = bookingResponseSchema.safeParse(payload);
       if (!parsed.success) throw new Error("Booking response is invalid.");
 
+      window.sessionStorage.setItem(
+        bookingTicketStorageKey(parsed.data.bookingId),
+        JSON.stringify(parsed.data),
+      );
       setDetailsOpen(false);
       setActiveHold(null);
       setSelectedSeatId(null);
@@ -245,6 +252,7 @@ export function BookingExperience({
       } catch (callbackError) {
         console.error("Booking completion callback failed", callbackError);
       }
+      if (programSlug) router.push(`/p/${programSlug}/done/${parsed.data.bookingId}`);
     } catch (error) {
       const failure = error as ApiFailure;
       setBookingError(failure.message || "Unable to confirm your booking.");

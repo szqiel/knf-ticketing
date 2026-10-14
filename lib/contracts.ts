@@ -28,6 +28,11 @@ export const bookingSessionSchema = z.object({
   sessionToken: z.string().min(16),
 });
 export const BOOKING_SESSION_STORAGE_KEY = "knf26.booking.session";
+export const BOOKING_TICKET_STORAGE_PREFIX = "knf26.booking.ticket";
+
+export function bookingTicketStorageKey(bookingId: string) {
+  return `${BOOKING_TICKET_STORAGE_PREFIX}:${bookingId}`;
+}
 
 export const holdRequestSchema = z.object({
   seatId: z.string().min(1),
