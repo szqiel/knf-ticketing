@@ -139,6 +139,18 @@ export function BookingExperience({
     if (selectedSeatId && !selectedSeat) setSelectedSeatId(null);
   }, [selectedSeat, selectedSeatId]);
 
+  useEffect(() => {
+    if (
+      selectedSeat &&
+      selectedSeat.status !== "available" &&
+      !activeHold &&
+      !isHolding
+    ) {
+      setSelectedSeatId(null);
+      setBookingError("Kursi ini baru saja dipilih orang lain. Silakan pilih kursi lain.");
+    }
+  }, [activeHold, isHolding, selectedSeat]);
+
   const handleHoldExpired = useCallback(async () => {
     const hold = activeHold;
     if (!hold) return;
@@ -217,7 +229,9 @@ export function BookingExperience({
     setIsSubmitting(true);
     setBookingError(null);
     try {
-      const idempotencyKey = window.crypto.randomUUID();
+      const idempotencyKey = typeof window.crypto.randomUUID === "function"
+        ? window.crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
       const response = await fetch(`/api/programs/${seatMap.programId}/bookings`, {
         method: "POST",
         headers: {
@@ -237,22 +251,36 @@ export function BookingExperience({
       const parsed = bookingResponseSchema.safeParse(payload);
       if (!parsed.success) throw new Error("Booking response is invalid.");
 
-      window.sessionStorage.setItem(
-        bookingTicketStorageKey(parsed.data.bookingId),
-        JSON.stringify(parsed.data),
-      );
+      const booking = parsed.data;
+      try {
+        window.sessionStorage.setItem(
+          bookingTicketStorageKey(booking.bookingId),
+          JSON.stringify(booking),
+        );
+      } catch (storageError) {
+        console.warn("Unable to persist the ticket for the success page", storageError);
+      }
+
       setDetailsOpen(false);
       setActiveHold(null);
       setSelectedSeatId(null);
       setBookingError(null);
-      await seatMap.refresh();
-      await onBookingComplete?.(parsed.data);
-      try {
-        await onBookingDetails?.(selectedSeat, details);
-      } catch (callbackError) {
+
+      if (programSlug) router.push(`/p/${programSlug}/done/${booking.bookingId}`);
+
+      void seatMap.refresh().catch((refreshError) => {
+        console.error("Unable to refresh the seat map after booking", refreshError);
+      });
+      void Promise.resolve().then(async () => {
+        await onBookingComplete?.(booking);
+        try {
+          await onBookingDetails?.(selectedSeat, details);
+        } catch (callbackError) {
+          console.error("Booking completion callback failed", callbackError);
+        }
+      }).catch((callbackError) => {
         console.error("Booking completion callback failed", callbackError);
-      }
-      if (programSlug) router.push(`/p/${programSlug}/done/${parsed.data.bookingId}`);
+      });
     } catch (error) {
       const failure = error as ApiFailure;
       setBookingError(failure.message || "Unable to confirm your booking.");

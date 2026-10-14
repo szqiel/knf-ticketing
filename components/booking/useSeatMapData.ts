@@ -62,6 +62,30 @@ export function useSeatMapData({ programSlug, initialSeats }: UseSeatMapDataOpti
     return () => controller.abort();
   }, [loadSeatMap]);
 
+  useEffect(() => {
+    if (!programId) return;
+
+    const eventSource = new EventSource(`/api/programs/${programId}/stream`);
+    let refreshTimer: number | undefined;
+
+    const scheduleRefresh = () => {
+      if (refreshTimer !== undefined) return;
+
+      refreshTimer = window.setTimeout(() => {
+        refreshTimer = undefined;
+        void loadSeatMap();
+      }, 80);
+    };
+
+    eventSource.addEventListener("seats_changed", scheduleRefresh);
+
+    return () => {
+      eventSource.removeEventListener("seats_changed", scheduleRefresh);
+      eventSource.close();
+      if (refreshTimer !== undefined) window.clearTimeout(refreshTimer);
+    };
+  }, [loadSeatMap, programId]);
+
   const refresh = useCallback(async () => {
     await loadSeatMap();
   }, [loadSeatMap]);
