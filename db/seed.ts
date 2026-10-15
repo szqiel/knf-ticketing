@@ -20,9 +20,9 @@ async function seed() {
     title: program.title,
     subtitle: program.subtitle ?? null,
     description: program.description ?? null,
-    showDate: index < 4 ? "2026-11-07" : "2026-11-08",
-    startsAt: `${String(10 + (index % 4) * 2).padStart(2, "0")}:00:00`,
-    endsAt: `${String(12 + (index % 4) * 2).padStart(2, "0")}:00:00`,
+    showDate: program.showDate ?? (index < 4 ? "2026-10-17" : "2026-10-18"),
+    startsAt: program.startsAt ?? `${String(10 + (index % 4) * 2).padStart(2, "0")}:00:00`,
+    endsAt: program.endsAt ?? `${String(12 + (index % 4) * 2).padStart(2, "0")}:00:00`,
     dayLabel: program.dayLabel,
     sortOrder: index,
     isPublished: true,
@@ -41,31 +41,38 @@ async function seed() {
   }));
 
   try {
-    const insertedPrograms = await db
+    await db
       .insert(programs)
       .values(programRows)
-      .onConflictDoNothing({ target: programs.slug })
-      .returning({ id: programs.id });
+      .onConflictDoNothing({ target: programs.slug });
 
-    const filmRows = insertedPrograms.flatMap((program, programIndex) =>
-      Array.from({ length: 10 }, (_, filmIndex) => ({
-        programId: program.id,
-        title: `Seed Film ${programIndex + 1}.${filmIndex + 1}`,
-        director: "TBD",
-        durationMin: 10,
-        origin: "Indonesia",
-        synopsis: "Replace this seed synopsis with the final film synopsis.",
+    const existingPrograms = await db
+      .select({ id: programs.id, slug: programs.slug })
+      .from(programs);
+
+    const programMap = new Map(existingPrograms.map((p) => [p.slug, p.id]));
+
+    const filmRows = MOCK_PROGRAMS.flatMap((program) => {
+      const pId = programMap.get(program.slug);
+      if (!pId || !program.films) return [];
+
+      return program.films.map((film, filmIndex) => ({
+        programId: pId,
+        title: film.title,
+        director: film.director,
+        durationMin: film.durationMin ?? 15,
+        origin: film.origin,
+        synopsis: film.synopsis,
         sortOrder: filmIndex,
-      })),
-    );
+      }));
+    });
 
     if (filmRows.length > 0) {
       await db.insert(films).values(filmRows).onConflictDoNothing();
     }
     await db.insert(seats).values(seatRows).onConflictDoNothing();
 
-    const seededPrograms = await db.select({ id: programs.id }).from(programs);
-    const blockedSeatRows = seededPrograms.flatMap((program) =>
+    const blockedSeatRows = existingPrograms.flatMap((program) =>
       seatRows
         .filter((seat) => isCinemaFrontUnavailable(seat.rowName, seat.number))
         .map((seat) => ({
@@ -80,7 +87,7 @@ async function seed() {
     }
 
     console.log(
-      `Seeded ${insertedPrograms.length} programs, ${filmRows.length} films, ${seatRows.length} seats, and ${blockedSeatRows.length} blocked-seat mappings.`,
+      `Seeded ${existingPrograms.length} programs, ${filmRows.length} films, ${seatRows.length} seats, and ${blockedSeatRows.length} blocked-seat mappings.`,
     );
   } finally {
     await sql.end();
