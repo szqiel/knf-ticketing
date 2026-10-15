@@ -157,6 +157,17 @@ Every commit must strictly follow conventional commits with bullet points explai
   - **No visual notices, banners, or lock explanations** on the audience booking screen.
   - Audiences simply see rear seats as regular gray sold seats without knowing internal gating thresholds.
   - Validation is strictly enforced on the backend (`holdSeat` transaction rejects rear seats before 150 front seats are held/sold).
+- **Floating Confirmation Bar (1:1 Figma node `102:962` & `174:14496`)**:
+  - **Container**: `borderRadius: 10px`, `padding: 10px 10px 10px 28px`, `background: linear-gradient(0deg, rgba(113, 118, 168, 1) 0%, rgba(0, 10, 105, 1) 12%, rgba(0, 21, 207, 1) 100%)`.
+  - **Eyebrow**: `"YOUR SEATS"` (Arial 900 Black, 10.4px, uppercase, letter-spacing 0.13em, `#ffffff`).
+  - **Seat Label**: `"None selected"` / `${seat.label}` (Arial 700 Bold, 16px, `#ffffff`).
+  - **Count**: `"0 seats"` / `"1 seat"` (Arial 400 Regular, 12.8px, `#e7e7e3`).
+  - **Idle Button (`102:970`)**: Height 60.8px, border radius 16px, border `1.6px solid #fff`, background `linear-gradient(180deg, #e7e7e3 33%, #a9a9a9 76%, #d5d5d5 99%)`, text gradient `linear-gradient(90deg, #000a69 0%, #0015cf 100%)`.
+  - **Hovered / Active Button (`174:14504`)**: Height 60.8px, border radius 16px, border `1.6px solid #fff`, background `linear-gradient(180deg, #0015cf 33%, #000a69 76%, #808cff 99%)`, text `#ffffff`.
+  - **Scroll Non-Overlap Architecture**:
+    - Bar uses `position: sticky; bottom: 20px; z-index: 40;` to smoothly follow audience scroll.
+    - `.cinemaCanvas` bottom padding is set to `8.5rem` (~136px), plus canvas stage bottom distance of 47px.
+    - When audiences scroll all the way to the end, Row S seats are located > 120px safely ABOVE the bar, preventing any overlap or click blocking.
 
 ---
 
