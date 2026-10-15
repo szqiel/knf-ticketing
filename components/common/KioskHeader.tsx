@@ -10,6 +10,7 @@ export interface BackButtonProps {
   onClick?: () => void;
   className?: string;
   ariaLabel?: string;
+  disabled?: boolean;
 }
 
 export function BackButton({
@@ -17,12 +18,14 @@ export function BackButton({
   onClick,
   className = "",
   ariaLabel = "Kembali",
+  disabled = false,
 }: BackButtonProps) {
   if (onClick) {
     return (
       <button
         type="button"
         onClick={onClick}
+        disabled={disabled}
         className={`${styles.backButton} ${className}`}
         aria-label={ariaLabel}
       >

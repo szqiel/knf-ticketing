@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { BackButton } from "@/components/common/KioskHeader";
 import styles from "./BookingModal.module.css";
 
 export type BookingDetails = {
@@ -92,9 +93,7 @@ export function YourDetailsModal({
           </div>
 
           <div className={styles.actions}>
-            <button className={styles.backButton} type="button" onClick={onClose} disabled={isSubmitting}>
-              <span aria-hidden="true">←</span> Back
-            </button>
+            <BackButton onClick={onClose} disabled={isSubmitting} />
             <button
               className={`${styles.submitButton} ${isFormValid ? styles.submitButtonActive : styles.submitButtonIdle}`}
               type="submit"
