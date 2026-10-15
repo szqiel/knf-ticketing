@@ -144,11 +144,13 @@ export function FilmDetailModal({
                 aria-label={film.title}
               >
                 <defs>
+                  {/* Glossy blue chrome split at 50% (half of the text) */}
                   <linearGradient id={titleBlueGradId} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#0014CA" />
-                    <stop offset="30%" stopColor="#8993EB" />
-                    <stop offset="30%" stopColor="#0015CF" />
-                    <stop offset="100%" stopColor="#0015CF" />
+                    <stop offset="46%" stopColor="#8993EB" />
+                    <stop offset="49%" stopColor="#FFFFFF" />
+                    <stop offset="50%" stopColor="#0015CF" />
+                    <stop offset="100%" stopColor="#000A69" />
                   </linearGradient>
                   <filter
                     id={titleShadowId}
@@ -211,9 +213,10 @@ export function FilmDetailModal({
                 <defs>
                   <linearGradient id={synBlueGradId} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#0014CA" />
-                    <stop offset="61%" stopColor="#8993EB" />
-                    <stop offset="61%" stopColor="#0015CF" />
-                    <stop offset="100%" stopColor="#0015CF" />
+                    <stop offset="46%" stopColor="#8993EB" />
+                    <stop offset="49%" stopColor="#FFFFFF" />
+                    <stop offset="50%" stopColor="#0015CF" />
+                    <stop offset="100%" stopColor="#000A69" />
                   </linearGradient>
                   <filter
                     id={synShadowId}
