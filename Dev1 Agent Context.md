@@ -148,6 +148,20 @@ Every commit must strictly follow conventional commits with bullet points explai
 
 ## 6. Mistakes Encountered & Lessons Learned
 
+### 5.4 Screen 3: Interactive Cinema Seat Map (`/p/[slug]/seats`)
+- **Total Canonical Seats**: **506 seats** (250 Upper A–H, 256 Lower J–S).
+- **Seat Numbering**: From screen right-to-left (e.g., A1 is the rightmost front seat, A29 is the leftmost front seat).
+- **VIP/Front-Center Reserved Blocks**: `A10–20`, `B10–21`, `C10–22`, `D10–22` (49 seats total) reserved and locked to sold/blocked.
+- **Progressive Rear-Row Unlock Logic**: Rear rows `J–S` (256 seats) remain blocked until cumulative occupied front seats (`A–H`) reach $\ge 150$.
+- **Strict Audience Privacy Constraint**:
+  - **No visual notices, banners, or lock explanations** on the audience booking screen.
+  - Audiences simply see rear seats as regular gray sold seats without knowing internal gating thresholds.
+  - Validation is strictly enforced on the backend (`holdSeat` transaction rejects rear seats before 150 front seats are held/sold).
+
+---
+
+## 6. Known Pitfalls, Mistakes & Technical Lessons Learned
+
 ### 6.1 Static Height Overrides Breaking Aspect Ratios (Film Posters & Stills)
 - **Mistake**: When initially implementing `FilmDetailModal.tsx`, a fixed height (`min-height: 585px`) was set on the poster column, and fixed `height: 208px` on the still photo box. This stretched 2:3 portrait posters into awkward 1:2 vertical strips, and distorted 16:9 widescreen stills into ultra-wide banners.
 - **Lesson**: Never use static pixel heights for media frames. Use standard CSS `aspect-ratio: 2 / 3` for film posters and `aspect-ratio: 16 / 9` for widescreen video stills, paired with `max-width` and `object-fit: cover`.
@@ -189,7 +203,7 @@ NEXT_TELEMETRY_DISABLED=1
   - Program Detail & Film Line-Up: `#102:203`
   - Film Detail Modal (Yellow Card): `#132:467`
   - No Seats Available Modal (Blue Card): `#171:256`
-  - Interactive Seat Map: `#102:757` / `#174:10921`
+  - Interactive Seat Map: `#102:757` / `#179:18142`
   - Form Overlay: `#132:1413`
   - Success State ("Selamat Bersinema!"): `#102:1187`
 
@@ -197,12 +211,10 @@ NEXT_TELEMETRY_DISABLED=1
 
 ## 8. Immediate Next Steps (Priority Order)
 
-1. **Screen 3: Interactive Seat Map 1:1 Visual Alignment (`/p/[slug]/seats`)**:
-   - Align cinema curve, aisle widths, and seat colors with `102:757` and `174:10921`.
-   - Ensure the floating summary rail and `Confirm Seats →` button match the exact jelly blue / silver disabled token styles.
-2. **Overlay 3: Identity Form Overlay (`132:1413`)**:
+1. **Overlay 3: Identity Form Overlay (`132:1413`)**:
    - Match input fields (Full Name, WhatsApp/Instagram, Email) to the Figma modal layout.
-3. **Screen 4: Ticket Confirmation Screen (`102:1187`)**:
+   - Wire atomic hold verification and submission error handling.
+2. **Screen 4: Ticket Confirmation Screen (`102:1187`)**:
    - Apply the celebratory gradient background, ticket card pass with QR code, and 30-second countdown auto-return progress bar.
-4. **Step 7: Content CMS (`/admin/programs`)**:
+3. **Step 7: Content CMS (`/admin/programs`)**:
    - Film line-up drag-and-drop reordering with `@hello-pangea/dnd` and poster image upload with WebP compression via `sharp`.
