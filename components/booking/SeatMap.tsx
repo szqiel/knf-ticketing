@@ -276,7 +276,7 @@ export function SeatMap({
 
       {showLegend && <SeatLegend labels={copy.legend} />}
 
-      {/* Floating Bottom Summary Rail */}
+      {/* Floating Bottom Summary Rail (1:1 Figma match node 102:962 & 174:14496) */}
       <aside className={styles.bottomRail} aria-live="polite">
         <div className={styles.bottomRailLeft}>
           <span className={styles.bottomRailEyebrow}>{copy.summaryLabel}</span>
@@ -286,12 +286,14 @@ export function SeatMap({
         </div>
         <span className={styles.bottomRailCount}>{countDisplay}</span>
         <button
-          className={`${styles.bottomRailButton} ${confirmActive ? styles.bottomRailButtonActive : styles.bottomRailButtonDisabled}`}
-          disabled={confirmButtonState === "disabled" || !confirmActive}
+          className={`${styles.bottomRailButton} ${confirmActive ? styles.bottomRailButtonActive : styles.bottomRailButtonIdle} ${confirmButtonState === "disabled" ? styles.bottomRailButtonDisabled : ""}`}
+          disabled={confirmButtonState === "disabled"}
           type="button"
           onClick={onConfirm}
         >
-          {copy.confirmLabel} <span aria-hidden="true">→</span>
+          <span className={styles.buttonText}>
+            {copy.confirmLabel} <span aria-hidden="true">→</span>
+          </span>
         </button>
       </aside>
     </section>

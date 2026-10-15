@@ -445,11 +445,12 @@ export function BookingExperience({
         selectedSeatId={selectedSeatId}
         onSelectSeat={handleSelectSeat}
         onConfirm={() => {
+          if (!selectedSeatId) return;
           if (!available) setNoSeatsOpen(true);
           else void handleConfirm();
         }}
-        confirmButtonState={isHolding ? "disabled" : "active"}
-        summaryCountLabel={isHolding ? "Holding…" : formatHoldTime(secondsRemaining)}
+        confirmButtonState={isHolding ? "disabled" : selectedSeatId ? "active" : "auto"}
+        summaryCountLabel={isHolding ? "Holding…" : selectedSeatId ? formatHoldTime(secondsRemaining) : "0 seats"}
       />
       <YourDetailsModal
         open={detailsOpen}

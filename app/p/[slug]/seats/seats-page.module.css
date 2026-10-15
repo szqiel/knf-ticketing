@@ -11,7 +11,7 @@
   margin: 0 auto;
   max-width: 1480px;
   min-height: 100svh;
-  padding: 2.5rem 1.8rem 2.5rem;
+  padding: 2.5rem 1.8rem 4.5rem;
 }
 
 .topBar {
@@ -161,7 +161,7 @@
 
 @media (max-width: 640px) {
   .stage {
-    padding: 1rem 1rem 5rem;
+    padding: 1rem 1rem 6.5rem;
   }
 
   .topBar {
