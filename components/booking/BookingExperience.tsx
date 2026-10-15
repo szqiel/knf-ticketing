@@ -21,6 +21,8 @@ import { useSeatMapData } from "./useSeatMapData";
 type BookingExperienceProps = {
   seats: Seat[];
   programSlug?: string;
+  dayLabel?: string;
+  timeSlot?: string;
   sessionToken?: string;
   onBookingDetails?: (seat: Seat, details: BookingDetails) => void | Promise<void>;
   onBookingComplete?: (booking: BookingResponse) => void | Promise<void>;
@@ -55,6 +57,8 @@ function formatHoldTime(seconds: number | null) {
 export function BookingExperience({
   seats: initialSeats,
   programSlug,
+  dayLabel,
+  timeSlot,
   sessionToken: initialSessionToken,
   onBookingDetails,
   onBookingComplete,
@@ -455,7 +459,12 @@ export function BookingExperience({
         error={bookingError}
         isSubmitting={isSubmitting}
       />
-      <NoSeatsModal open={noSeatsOpen} onClose={() => setNoSeatsOpen(false)} />
+      <NoSeatsModal
+        open={noSeatsOpen}
+        onClose={() => setNoSeatsOpen(false)}
+        dayLabel={dayLabel}
+        timeSlot={timeSlot}
+      />
     </>
   );
 }

@@ -77,6 +77,8 @@ async function SeatMapContent({ params, searchParams }: SeatMapPageProps) {
         <BookingExperience
           seats={seats}
           programSlug={slug}
+          dayLabel={program.dayLabel}
+          timeSlot={program.timeSlot}
           sessionToken={sessionToken}
           seatMapProps={{
             copy: {

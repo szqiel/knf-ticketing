@@ -364,12 +364,22 @@
   padding: 0 24px;
   background: #cccccc;
   border: 2px solid #aaaaaa;
-  color: #777777;
+  color: #666666;
   font-family: Arial, "Arial Black", sans-serif;
   font-weight: 900;
   font-size: 15px;
-  cursor: not-allowed;
+  cursor: pointer;
   white-space: nowrap;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.chooseSeatDisabled:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.chooseSeatDisabled:active {
+  transform: translateY(0);
 }
 
 /* ==========================================================================

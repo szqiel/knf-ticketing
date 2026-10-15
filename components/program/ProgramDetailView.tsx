@@ -6,6 +6,7 @@ import Link from "next/link";
 import styles from "./ProgramDetailView.module.css";
 import type { Film, Program } from "@/lib/data/mock-programs";
 import { FilmDetailModal } from "./FilmDetailModal";
+import { NoSeatsModal } from "@/components/booking/NoSeatsModal";
 import { ProgramHeroTitle } from "./ProgramHeroTitle";
 import { LineupHeader } from "./LineupHeader";
 
@@ -15,6 +16,7 @@ interface ProgramDetailViewProps {
 
 export function ProgramDetailView({ program }: ProgramDetailViewProps) {
   const [selectedFilm, setSelectedFilm] = useState<Film | null>(null);
+  const [noSeatsModalOpen, setNoSeatsModalOpen] = useState(false);
 
   const films = program.films ?? [];
   const filmCount = program.totalFilmsCount ?? films.length;
@@ -97,7 +99,12 @@ export function ProgramDetailView({ program }: ProgramDetailViewProps) {
             </div>
 
             {program.isSoldOut ? (
-              <button disabled className={styles.chooseSeatDisabled}>
+              <button
+                type="button"
+                onClick={() => setNoSeatsModalOpen(true)}
+                className={styles.chooseSeatDisabled}
+                aria-haspopup="dialog"
+              >
                 Sold Out
               </button>
             ) : (
@@ -164,6 +171,14 @@ export function ProgramDetailView({ program }: ProgramDetailViewProps) {
         film={selectedFilm}
         programTitle={program.title}
         onClose={() => setSelectedFilm(null)}
+      />
+
+      {/* No Seats Available Modal (Frame 7) */}
+      <NoSeatsModal
+        open={noSeatsModalOpen}
+        onClose={() => setNoSeatsModalOpen(false)}
+        dayLabel={program.dayLabel}
+        timeSlot={program.timeSlot}
       />
     </main>
   );
