@@ -296,6 +296,7 @@ export function SeatMap({
           </span>
         </button>
       </aside>
+      <div className={styles.bottomRailSpacer} aria-hidden="true" />
     </section>
   );
 }
