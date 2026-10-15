@@ -3,7 +3,6 @@
 import type { CSSProperties } from "react";
 import type { Seat } from "@/lib/contracts";
 import { CANONICAL_SEATS } from "@/lib/booking/canonical-seats";
-import { isFrontCinemaRow, isRearCinemaRow, isRearRowUnlocked } from "@/lib/booking/seat-layout";
 import styles from "./SeatMap.module.css";
 
 export type SeatMapLayout = "grid" | "cinema";
@@ -160,15 +159,6 @@ function CinemaSeatLayout({
           statusClass = seat.status === "blocked" ? styles.cinemaBlocked : styles.cinemaSold;
         }
 
-        let title = `Seat ${seat.label}`;
-        if (unavailable) {
-          if (isRearCinemaRow(seat.rowName)) {
-            title = `Seat ${seat.label} (Dibuka setelah baris depan terisi 150 kursi)`;
-          } else {
-            title = `Seat ${seat.label} (Tidak tersedia / Reserved)`;
-          }
-        }
-
         return (
           <button
             key={seat.id}
@@ -182,7 +172,7 @@ function CinemaSeatLayout({
             disabled={unavailable}
             aria-label={`Seat ${seat.label}${unavailable ? `, ${seat.status}` : ""}`}
             aria-pressed={selected}
-            title={title}
+            title={`Seat ${seat.label}`}
             onClick={() => onSelectSeat(seat)}
           >
             <ChairGlyph />
@@ -216,12 +206,6 @@ export function SeatMap({
   const visuals = { ...defaultVisuals, ...visualOverrides };
   const availableCount = seats.filter((seat) => seat.status === "available").length;
   const selectedSeat = seats.find((seat) => seat.id === selectedSeatId);
-
-  const frontOccupiedCount = seats.filter(
-    (s) => isFrontCinemaRow(s.rowName) && s.status !== "available",
-  ).length;
-  const rearUnlocked = isRearRowUnlocked(frontOccupiedCount);
-
   const confirmActive = confirmButtonState === "active"
     || (confirmButtonState === "auto" && Boolean(selectedSeat));
 
@@ -260,12 +244,6 @@ export function SeatMap({
               <div className={styles.cinemaScreenHeader}>
                 <div className={styles.cinemaScreenBar} />
                 <span className={styles.cinemaScreenText}>{copy.screenLabel}</span>
-                {!rearUnlocked && (
-                  <div className={styles.rearLockNotice} aria-live="polite">
-                    <span className={styles.lockIcon} aria-hidden="true">🔒</span>
-                    <span>Baris belakang (J–S) dibuka setelah baris depan terisi 150 kursi ({frontOccupiedCount}/150)</span>
-                  </div>
-                )}
               </div>
               <CinemaSeatLayout seats={seats} selectedSeatId={selectedSeatId} onSelectSeat={onSelectSeat} />
             </>
