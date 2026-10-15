@@ -2,6 +2,7 @@ import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { MOCK_PROGRAMS } from "../lib/data/mock-programs";
 import { isCinemaFrontUnavailable } from "../lib/booking/seat-layout";
+import { CANONICAL_SEATS } from "../lib/booking/canonical-seats";
 import { blockedSeats, films, programs, seats } from "../lib/db/schema";
 
 async function seed() {
@@ -28,22 +29,16 @@ async function seed() {
     bookingOpen: seedBookingOpen,
   }));
 
-  const seatRows = Array.from({ length: 25 }, (_, rowIndex) => {
-    const rowName = String.fromCharCode(65 + rowIndex);
-    return Array.from({ length: 20 }, (_, numberIndex) => {
-      const number = numberIndex + 1;
-      return {
-        id: `${rowName}-${String(number).padStart(2, "0")}`,
-        label: `${rowName}${number}`,
-        block: number <= 6 ? "LEFT" : number >= 15 ? "RIGHT" : "CENTER",
-        rowName,
-        number,
-        x: numberIndex * 44,
-        y: rowIndex * 44,
-        rotation: 0,
-      };
-    });
-  }).flat();
+  const seatRows = CANONICAL_SEATS.map((seat) => ({
+    id: seat.id,
+    label: seat.label,
+    block: seat.block,
+    rowName: seat.rowName,
+    number: seat.number,
+    x: seat.x,
+    y: seat.y,
+    rotation: seat.rotation,
+  }));
 
   try {
     const insertedPrograms = await db
