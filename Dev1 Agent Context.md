@@ -90,8 +90,8 @@ flowchart TD
 | **Overlay 1: Film Detail Modal** | `components/program/FilmDetailModal.tsx` | `132:467`, `Frame 5` | **100% Done** | Butter-yellow card, 2:3 poster, 16:9 still, 50% split chrome title |
 | **Overlay 2: No Seats Available** | `components/booking/NoSeatsModal.tsx` | `171:256`, `Frame 7` | **100% Done** | Icy-blue card, red jelly close button, chrome SVG title, schedule pill |
 | **Screen 3: Interactive Seat Map** | `app/p/[slug]/seats/page.tsx`, `components/booking/SeatMap.tsx` | `102:757`, `179:18142` | **100% Done** | 506 canonical seats, 1:1 confirmation bar (idle 102:962, hover 174:14496), fixed scroll tracking, smart demo fallback |
-| **Overlay 3: Identity Form Overlay** | `components/booking/YourDetailsModal.tsx` | `132:1413` | **80% Functional** | Form inputs name/whatsapp/email, needs 1:1 Figma styling polish |
-| **Screen 4: Ticket Confirmation** | `app/p/[slug]/done/[id]/page.tsx`, `components/booking/SuccessTicket.tsx` | `102:1187` | **85% Functional** | 30s countdown bar, booking ID display, needs visual ticket alignment |
+| **Overlay 3: Identity Form Overlay** | `components/booking/YourDetailsModal.tsx` | `102:1597` | **100% Done** | "Your Details.png" title, lighter label font, 1:1 seat bar (node 102:1597), idle/active Confirm Booking button |
+| **Screen 4: Ticket Confirmation** | `app/p/[slug]/done/[id]/page.tsx`, `components/booking/SuccessTicket.tsx` | `102:1187`, `102:1238` | **100% Done** | 1:1 Ticket card (node 102:1206), NoSeatsModal-style return button (node 102:1204), 10s auto reset countdown bar (node 102:1238) |
 | **Admin Operations** | `/admin`, `/api/admin/*` | N/A (Dev 2) | **100% Done** | Staff login, audience list, seat blocker, Excel/PDF export |
 | **Content CMS** | `/admin/programs` | Step 7 Roadmap | **Planned** | Drag-and-drop film reordering, WebP image upload |
 
