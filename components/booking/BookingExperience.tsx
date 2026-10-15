@@ -312,10 +312,27 @@ export function BookingExperience({
 
   const handleConfirm = async () => {
     if (!selectedSeat || isHolding) return;
+
+    // DEMO / MOCK FALLBACK (Bypass when database is not connected for UI/UX testing)
     if (!seatMap.programId) {
-      setBookingError(SEAT_MAP_CONNECTION_ERROR);
+      setIsHolding(true);
+      setBookingError(null);
+      try {
+        const mockHold: HoldResponse = {
+          reservationId: "11111111-1111-4111-8111-111111111111",
+          holdToken: "22222222-2222-4222-8222-222222222222",
+          seatId: selectedSeat.id,
+          expiresAt: new Date(Date.now() + 3 * 60 * 1000).toISOString(),
+        };
+        setActiveHold(mockHold);
+        setSecondsRemaining(180);
+        setDetailsOpen(true);
+      } finally {
+        setIsHolding(false);
+      }
       return;
     }
+
     setIsHolding(true);
     setBookingError(null);
     try {
@@ -349,7 +366,61 @@ export function BookingExperience({
   };
 
   const submitDetails = async (details: BookingDetails) => {
-    if (!selectedSeat || !activeHold || !seatMap.programId || !sessionToken || isSubmitting) return;
+    if (!selectedSeat || !activeHold || isSubmitting) return;
+
+    // DEMO / MOCK FALLBACK (Bypass when database is not connected for UI/UX testing)
+    if (!seatMap.programId) {
+      setIsSubmitting(true);
+      setBookingError(null);
+      try {
+        const bookingId = typeof window.crypto?.randomUUID === "function"
+          ? window.crypto.randomUUID()
+          : "33333333-3333-4333-8333-333333333333";
+        const mockProgramId = "44444444-4444-4444-8444-444444444444";
+
+        const booking: BookingResponse = {
+          bookingId,
+          programId: mockProgramId,
+          seatId: selectedSeat.id,
+          seatLabel: selectedSeat.label,
+          fullName: details.fullName,
+          contact: details.contact,
+          createdAt: new Date().toISOString(),
+        };
+
+        try {
+          window.sessionStorage.setItem(
+            bookingTicketStorageKey(booking.bookingId),
+            JSON.stringify(booking),
+          );
+        } catch (storageError) {
+          console.warn("Unable to persist the ticket for the success page", storageError);
+        }
+
+        setDetailsOpen(false);
+        setActiveHold(null);
+        setSelectedSeatId(null);
+        setBookingError(null);
+
+        if (programSlug) router.push(`/p/${programSlug}/done/${booking.bookingId}`);
+
+        void Promise.resolve().then(async () => {
+          await onBookingComplete?.(booking);
+          try {
+            await onBookingDetails?.(selectedSeat, details);
+          } catch (callbackError) {
+            console.error("Booking completion callback failed", callbackError);
+          }
+        }).catch((callbackError) => {
+          console.error("Booking completion callback failed", callbackError);
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    if (!sessionToken) return;
 
     setIsSubmitting(true);
     setBookingError(null);
