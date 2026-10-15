@@ -101,8 +101,19 @@ export const MOCK_PROGRAMS: Program[] = [
     timeSlot: "13:10 — 14:40",
     seatsLeft: 20,
     isSoldOut: false,
-    totalFilmsCount: 0,
-    films: [],
+    totalFilmsCount: 1,
+    films: [
+      {
+        id: "film-2-1",
+        title: "Perfected Grammar",
+        director: "Andrea Suwito",
+        duration: "11 Menit",
+        durationMin: 11,
+        origin: "Indonesia / Hongaria",
+        synopsis:
+          "Di Budapest, seorang ibu lanjut usia mengajarkan putrinya yang berbahasa Hungaria tentang perbedaan kalimat aktif dan pasif dalam bahasa Indonesia. Dari pelajaran bahasa keluarga yang intim, terungkap kisah mendalam tentang pengasingan, trauma sejarah, dan perjalanan hidup di negeri orang.",
+      },
+    ],
   },
   {
     id: "prog-3",
