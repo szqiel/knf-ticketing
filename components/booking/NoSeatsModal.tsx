@@ -22,12 +22,11 @@ export function NoSeatsModal({
   const router = useRouter();
   const uid = useId().replace(/:/g, "");
 
-  const blueGradId = `nsBlueGrad-${uid}`;
-  const yellowGradId = `nsYellowGrad-${uid}`;
-  const shadowId = `nsShadow-${uid}`;
-  const redGradId = `nsRedGrad-${uid}`;
+  const fillGradId = `text-fill-grad-${uid}`;
+  const strokeGradId = `text-stroke-grad-${uid}`;
+  const shadowId = `text-shadow-${uid}`;
 
-  // Keyboard escape listener
+  // Keyboard Escape listener
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -61,128 +60,111 @@ export function NoSeatsModal({
         }
       }}
     >
-      <section
-        className={styles.dialog}
+      {/* Modal Dialog Container (#171:256) */}
+      <div
+        className={styles.dialogCard}
         role="dialog"
+        aria-labelledby={`dialog-title-${uid}`}
         aria-modal="true"
-        aria-labelledby={`no-seats-title-${uid}`}
       >
-        {/* 1. Close / Status Button (Figma Node #171:259 - #171:260) */}
-        <button
-          className={styles.closeButton}
-          type="button"
-          aria-label="Tutup dialog kursi habis"
-          onClick={onClose}
-        >
-          <svg
-            viewBox="0 0 48 48"
-            className={styles.closeSvg}
-            aria-hidden="true"
-          >
-            <defs>
-              <linearGradient id={redGradId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#790000" />
-                <stop offset="53%" stopColor="#FF4646" />
-                <stop offset="100%" stopColor="#DF0000" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M12 12L36 36M36 12L12 36"
-              stroke={`url(#${redGradId})`}
-              strokeWidth="7"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-
-        {/* 2. Display Title: "No Seats Available" (Figma Node #171:261 - #171:262) */}
-        <svg
-          viewBox="0 0 380 144"
-          className={styles.titleSvg}
-          role="img"
-          aria-labelledby={`no-seats-title-${uid}`}
-        >
-          <title id={`no-seats-title-${uid}`}>No Seats Available</title>
-          <defs>
-            {/* White-to-sky-blue gradient for "No Seats" */}
-            <linearGradient id={blueGradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FFFFFF" />
-              <stop offset="35%" stopColor="#D5E8FF" />
-              <stop offset="65%" stopColor="#6DA7FF" />
-              <stop offset="100%" stopColor="#2565F6" />
-            </linearGradient>
-
-            {/* White-to-yellow gradient for "Available" */}
-            <linearGradient id={yellowGradId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FFFFFF" />
-              <stop offset="40%" stopColor="#FFFF78" />
-              <stop offset="100%" stopColor="#F6FF00" />
-            </linearGradient>
-
-            {/* Deep navy 3D drop shadow */}
-            <filter
-              id={shadowId}
-              x="-20%"
-              y="-20%"
-              width="140%"
-              height="140%"
+        <div className={styles.dialogInner}>
+          {/* Close Button (#171:258, #171:259, #171:260) */}
+          <div className={styles.closeButtonWrapper}>
+            <button
+              className={styles.closeBtn}
+              type="button"
+              aria-label="Close dialog"
+              onClick={onClose}
             >
-              <feDropShadow
-                dx="0"
-                dy="4"
-                stdDeviation="0.1"
-                floodColor="#000A69"
-                floodOpacity="1"
-              />
-            </filter>
-          </defs>
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
 
-          {/* Line 1: No Seats */}
-          <text
-            x="190"
-            y="56"
-            textAnchor="middle"
-            fill={`url(#${blueGradId})`}
-            stroke="#000A69"
-            strokeWidth="5"
-            paintOrder="stroke fill"
-            filter={`url(#${shadowId})`}
-            className={styles.headingText}
-          >
-            No Seats
-          </text>
+          {/* Title: "No Seats Available" (#171:261, #171:262) */}
+          <div className={styles.titleContainer}>
+            <svg
+              className={styles.svgTitle}
+              viewBox="0 0 389 160"
+              aria-label="No Seats Available"
+            >
+              <defs>
+                {/* Fill Gradient: #FFFFFF -> #F6FF00 */}
+                <linearGradient id={fillGradId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(255, 255, 255, 1)" />
+                  <stop offset="100%" stopColor="rgba(246, 255, 0, 1)" />
+                </linearGradient>
 
-          {/* Line 2: Available */}
-          <text
-            x="190"
-            y="126"
-            textAnchor="middle"
-            fill={`url(#${yellowGradId})`}
-            stroke="#000A69"
-            strokeWidth="5"
-            paintOrder="stroke fill"
-            filter={`url(#${shadowId})`}
-            className={styles.headingText}
-          >
-            Available
-          </text>
-        </svg>
+                {/* Multi-stop Stroke Gradient */}
+                <linearGradient id={strokeGradId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(0, 17, 173, 1)" />
+                  <stop offset="21%" stopColor="rgba(207, 212, 253, 1)" />
+                  <stop offset="27%" stopColor="rgba(2, 22, 207, 1)" />
+                  <stop offset="51%" stopColor="rgba(1, 22, 207, 1)" />
+                  <stop offset="62%" stopColor="rgba(239, 241, 255, 1)" />
+                  <stop offset="74%" stopColor="rgba(0, 21, 207, 1)" />
+                </linearGradient>
 
-        {/* 3. Schedule Pill (Figma Node #171:263 - #171:268) */}
-        <div className={styles.schedulePill}>
-          <span className={styles.dayText}>{dayLabel}</span>
-          <span className={styles.timeText}>{timeSlot}</span>
+                {/* Text Shadow: 0px 4px 0px 0px rgba(0, 10, 105, 1) */}
+                <filter
+                  id={shadowId}
+                  x="-20%"
+                  y="-20%"
+                  width="140%"
+                  height="140%"
+                >
+                  <feDropShadow
+                    dx="0"
+                    dy="4"
+                    stdDeviation="0"
+                    floodColor="rgba(0, 10, 105, 1)"
+                  />
+                </filter>
+              </defs>
+
+              <text
+                id={`dialog-title-${uid}`}
+                x="194.5"
+                y="55"
+                className={styles.svgTitleText}
+                fill={`url(#${fillGradId})`}
+                stroke={`url(#${strokeGradId})`}
+                filter={`url(#${shadowId})`}
+              >
+                No Seats
+              </text>
+              <text
+                x="194.5"
+                y="118"
+                className={styles.svgTitleText}
+                fill={`url(#${fillGradId})`}
+                stroke={`url(#${strokeGradId})`}
+                filter={`url(#${shadowId})`}
+              >
+                Available
+              </text>
+            </svg>
+          </div>
+
+          {/* Schedule Badge (#171:263, #171:264, #171:266, #171:268) */}
+          <div className={styles.scheduleBadgeContainer}>
+            <div className={styles.scheduleBadge}>
+              <div className={styles.scheduleDay}>{dayLabel}</div>
+              <div className={styles.scheduleTime}>{timeSlot}</div>
+            </div>
+          </div>
+
+          {/* Primary Action Button (#171:269, #171:270) */}
+          <div className={styles.primaryBtnWrapper}>
+            <button
+              className={styles.primaryBtn}
+              type="button"
+              onClick={handleChooseAnother}
+            >
+              Choose Another Program
+            </button>
+          </div>
         </div>
-
-        {/* 4. Action Button: "Choose Another Program" (Figma Node #171:269 - #171:270) */}
-        <button
-          className={styles.primaryButton}
-          type="button"
-          onClick={handleChooseAnother}
-        >
-          Choose Another Program
-        </button>
-      </section>
+      </div>
     </div>
   );
 }

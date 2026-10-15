@@ -1,19 +1,19 @@
 /* ==========================================================================
-   No Seats Available Modal Styles (Figma Frame 7 / Node #171:256)
-   Frutiger Aero Blue Theme with Signature Aqua Styling
+   No Seats Available Dialog (Translated 1:1 from figma-dialog/index.html)
+   Figma Node #171:256, #171:257, #171:258, #171:261, #171:263, #171:269
    ========================================================================== */
 
 .backdrop {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background-color: rgba(17, 17, 16, 0.72);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(11, 15, 25, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
   animation: backdropFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
@@ -27,29 +27,26 @@
   }
 }
 
-/* Modal Card (Node #171:256) */
-.dialog {
+/* Modal Dialog Container (#171:256) */
+.dialogCard {
   position: relative;
-  width: 100%;
-  max-width: 531px;
+  width: 531px;
+  max-width: 100%;
   background: linear-gradient(
     180deg,
-    #ffffff 1%,
-    #c9e1f2 32%,
-    #a8cde8 80%,
-    #eaebf7 100%
+    rgba(255, 255, 255, 1) 1%,
+    rgba(201, 225, 242, 1) 32%,
+    rgba(168, 205, 232, 1) 80%,
+    rgba(234, 235, 247, 1) 100%
   );
   border-radius: 20px;
-  border: 1.5px solid rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0px 20px 50px rgba(0, 10, 80, 0.35),
-    0px 4px 16px rgba(0, 0, 0, 0.18),
-    inset 0px 2px 4px rgba(255, 255, 255, 0.8);
-  padding: 44px 36px 42px 36px;
+  padding: 64px;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 10, 105, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
   box-sizing: border-box;
   animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -65,221 +62,245 @@
   }
 }
 
-/* Close / Status Button (Node #171:259 - #171:260) */
-.closeButton {
+.dialogInner {
   position: relative;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: linear-gradient(
-    180deg,
-    #ffe3e3 18%,
-    #ffffff 37%,
-    #ffc7c7 77%,
-    #f2f2f2 100%
-  );
-  border: 1.5px solid #ea8c8c;
-  box-shadow:
-    0px 6px 16px rgba(217, 0, 0, 0.35),
-    0px 2px 4px rgba(0, 0, 0, 0.2),
-    inset 0 2px 2px #ffffff,
-    inset 0 -3px 5px rgba(217, 0, 0, 0.25);
+  width: 100%;
+  height: 519px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Close Button (Figma Node #171:258, #171:259, #171:260) */
+.closeButtonWrapper {
+  position: absolute;
+  top: 19px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 114px;
+  padding-bottom: 28px;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+  display: flex;
+  justify-content: center;
+}
+
+.closeBtn {
+  width: 110px;
+  height: 120px;
+  border-radius: 78px;
+  border: 1px solid transparent;
+  background: 
+    linear-gradient(
+      180deg,
+      rgba(255, 227, 227, 1) 18%,
+      rgba(255, 255, 255, 1) 37%,
+      rgba(255, 199, 199, 1) 77%,
+      rgba(242, 242, 242, 1) 100%
+    ) padding-box,
+    linear-gradient(
+      180deg,
+      rgba(234, 140, 140, 1) 0%,
+      rgba(255, 191, 191, 1) 31%,
+      rgba(249, 113, 113, 1) 64%,
+      rgba(217, 0, 0, 1) 90%
+    ) border-box;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  outline: none;
+  user-select: none;
   padding: 0;
-  margin: 0 0 16px 0;
-  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
-  user-select: none;
 }
 
-.closeButton:hover {
-  transform: scale(1.05);
-  filter: brightness(1.04);
-  box-shadow:
-    0px 8px 20px rgba(217, 0, 0, 0.45),
-    0px 3px 6px rgba(0, 0, 0, 0.25),
-    inset 0 2px 3px #ffffff,
-    inset 0 -3px 5px rgba(217, 0, 0, 0.3);
+.closeBtn:hover {
+  transform: scale(1.04);
+  filter: brightness(1.02);
 }
 
-.closeButton:active {
-  transform: scale(0.96);
-  filter: brightness(0.97);
+.closeBtn:active {
+  transform: scale(0.97);
 }
 
-.closeSvg {
-  width: 56px;
-  height: 56px;
-  display: block;
+.closeBtn span {
+  font-size: 128px;
+  line-height: 1;
+  font-weight: 400;
+  background: linear-gradient(
+    180deg,
+    rgba(121, 0, 0, 1) 0%,
+    rgba(255, 70, 70, 1) 53%,
+    rgba(223, 0, 0, 1) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -12px;
 }
 
-/* Heading SVG: "No Seats Available" (Node #171:261 - #171:262) */
-.titleSvg {
+/* Title: "No Seats Available" (Figma Node #171:261, #171:262) */
+.titleContainer {
+  position: absolute;
+  top: 178px;
+  left: 0;
   width: 100%;
-  max-width: 380px;
-  height: 144px;
-  display: block;
-  margin-top: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* SVG text for exact gradient stroke + gradient fill + drop shadow matching Figma 1:1 */
+.svgTitle {
+  width: 389px;
+  height: 160px;
   overflow: visible;
+  display: block;
 }
 
-.headingText {
-  font-family: "Arial Narrow", Arial, sans-serif;
-  font-stretch: condensed;
-  font-style: italic;
+.svgTitleText {
+  font-family: Arial, sans-serif;
+  font-size: 83.66px;
   font-weight: 700;
-  font-size: 62px;
-  letter-spacing: -0.03em;
-  user-select: none;
+  font-style: italic;
+  letter-spacing: -0.0314em;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  stroke-width: 3px;
+  paint-order: stroke fill;
 }
 
-/* Schedule Pill Container (Node #171:263 - #171:268) */
-.schedulePill {
-  width: 100%;
-  max-width: 310px;
-  height: 54px;
-  margin-top: 22px;
+/* Schedule Badge (Figma Node #171:263, #171:264) */
+.scheduleBadgeContainer {
+  position: absolute;
+  top: 352px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 310px;
+  padding: 14px 0 28px;
+}
+
+.scheduleBadge {
+  width: 310px;
+  height: 53.6px;
+  border-radius: 9px;
   background: linear-gradient(
     0deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0.85) 100%
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.76) 100%
   );
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow:
-    inset 0px 0px 4px 0px rgba(0, 10, 105, 0.3),
-    0 2px 6px rgba(0, 10, 60, 0.08);
-  border-radius: 9px;
+  box-shadow: inset 0px 0px 4px 0px rgba(0, 10, 105, 1);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 22px;
-  box-sizing: border-box;
+  overflow: hidden;
 }
 
-.dayText {
-  font-family: Arial, sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 24px;
-  color: #111110;
-  user-select: none;
-}
-
-.timeText {
-  font-family: Arial, sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 19px;
-  color: #111110;
-  user-select: none;
-}
-
-/* Primary Button: "Choose Another Program" (Node #171:269 - #171:270) */
-.primaryButton {
-  position: relative;
-  width: 100%;
-  max-width: 320px;
-  height: 52px;
-  margin-top: 22px;
-  border-radius: 52px;
-  background: linear-gradient(
-    180deg,
-    #afb7ff 2%,
-    #4154ff 28%,
-    #5061ff 64%,
-    #808cff 99%
-  );
-  border: 3px solid #0011ad;
-  box-shadow:
-    0px 4px 10px rgba(0, 10, 105, 0.63),
-    inset 0 2px 2px rgba(255, 255, 255, 0.65),
-    inset 0 -2px 3px rgba(0, 10, 105, 0.4);
-  color: #ffffff;
-  font-family: Arial, sans-serif;
-  font-style: normal;
-  font-weight: 900;
-  font-size: 15px;
-  line-height: 24px;
-  letter-spacing: 0.02em;
-  text-shadow: 0 1px 2px rgba(0, 10, 105, 0.85);
+.scheduleDay {
+  width: 72px;
+  height: 51px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  padding: 0 24px;
-  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: #111110;
+  text-align: center;
   user-select: none;
-  box-sizing: border-box;
 }
 
-.primaryButton:hover {
-  transform: translateY(-1px) scale(1.02);
-  filter: brightness(1.06);
-  box-shadow:
-    0px 6px 14px rgba(0, 10, 105, 0.72),
-    inset 0 2px 3px rgba(255, 255, 255, 0.8),
-    inset 0 -2px 4px rgba(0, 10, 105, 0.45);
+.scheduleTime {
+  width: 232px;
+  height: 51px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 18.72px;
+  font-weight: 700;
+  color: #111110;
+  text-align: center;
+  user-select: none;
 }
 
-.primaryButton:active {
-  transform: translateY(1px) scale(0.98);
-  filter: brightness(0.96);
+/* Primary Button (Figma Node #171:269, #171:270) */
+.primaryBtnWrapper {
+  position: absolute;
+  top: 437px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+}
+
+.primaryBtn {
+  width: 320px;
+  height: 56px;
+  padding: 0 28px;
+  border-radius: 52px;
+  border: 3px solid transparent;
+  background: 
+    linear-gradient(
+      180deg,
+      rgba(175, 183, 255, 1) 2%,
+      rgba(65, 84, 255, 1) 28%,
+      rgba(80, 97, 255, 1) 64%,
+      rgba(128, 140, 255, 1) 99%
+    ) padding-box,
+    linear-gradient(
+      180deg,
+      rgba(0, 17, 173, 1) 0%,
+      rgba(207, 212, 253, 1) 0%,
+      rgba(2, 22, 207, 1) 8%,
+      rgba(1, 22, 207, 1) 62%,
+      rgba(239, 241, 255, 1) 87%,
+      rgba(0, 21, 207, 1) 100%
+    ) border-box;
+  box-shadow: 0px 3px 7.5px 0px rgba(0, 10, 105, 0.63);
+  color: #FFFFFF;
+  font-family: Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 900;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  outline: none;
+  user-select: none;
+}
+
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 14px 0px rgba(0, 10, 105, 0.7);
+  filter: brightness(1.05);
+}
+
+.primaryBtn:active {
+  transform: translateY(1px);
+  box-shadow: 0px 2px 5px 0px rgba(0, 10, 105, 0.6);
 }
 
 /* ==========================================================================
-   Responsive Adaptations
+   Responsive Adaptation for Small Screens (Mobile)
    ========================================================================== */
-@media (max-width: 600px) {
+@media (max-width: 580px) {
   .backdrop {
-    padding: 16px;
+    padding: 12px;
   }
 
-  .dialog {
-    padding: 36px 20px 32px 20px;
-    border-radius: 16px;
-    max-width: 100%;
+  .dialogCard {
+    padding: 24px 16px;
+    width: 100%;
+    max-width: 360px;
   }
 
-  .closeButton {
-    width: 84px;
-    height: 84px;
-    margin-bottom: 12px;
-  }
-
-  .closeSvg {
-    width: 44px;
-    height: 44px;
-  }
-
-  .titleSvg {
-    height: 124px;
-  }
-
-  .headingText {
-    font-size: 52px;
-  }
-
-  .schedulePill {
-    max-width: 100%;
-    height: 48px;
-    padding: 0 16px;
-    margin-top: 18px;
-  }
-
-  .dayText {
-    font-size: 14px;
-  }
-
-  .timeText {
-    font-size: 13px;
-  }
-
-  .primaryButton {
-    max-width: 100%;
-    height: 48px;
-    font-size: 14px;
-    margin-top: 18px;
+  .dialogInner {
+    height: 460px;
+    transform: scale(0.85);
+    transform-origin: top center;
   }
 }
