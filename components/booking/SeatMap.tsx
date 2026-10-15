@@ -47,6 +47,7 @@ export type SeatMapProps = {
   showAvailability?: boolean;
   confirmButtonState?: "auto" | "active" | "disabled";
   summaryCountLabel?: string;
+  hideBottomRail?: boolean;
 };
 
 const defaultCopy: SeatMapCopy = {
@@ -197,6 +198,7 @@ export function SeatMap({
   showAvailability = true,
   confirmButtonState = "auto",
   summaryCountLabel,
+  hideBottomRail = false,
 }: SeatMapProps) {
   const copy = {
     ...defaultCopy,
@@ -277,26 +279,30 @@ export function SeatMap({
       {showLegend && <SeatLegend labels={copy.legend} />}
 
       {/* Floating Bottom Summary Rail (1:1 Figma match node 102:962 & 174:14496) */}
-      <aside className={styles.bottomRail} aria-live="polite">
-        <div className={styles.bottomRailLeft}>
-          <span className={styles.bottomRailEyebrow}>{copy.summaryLabel}</span>
-          <strong className={styles.bottomRailSeat}>
-            {selectedSeat ? selectedSeat.label : copy.emptySeatLabel}
-          </strong>
-        </div>
-        <span className={styles.bottomRailCount}>{countDisplay}</span>
-        <button
-          className={`${styles.bottomRailButton} ${confirmActive ? styles.bottomRailButtonActive : styles.bottomRailButtonIdle} ${confirmButtonState === "disabled" ? styles.bottomRailButtonDisabled : ""}`}
-          disabled={confirmButtonState === "disabled"}
-          type="button"
-          onClick={onConfirm}
-        >
-          <span className={styles.buttonText}>
-            {copy.confirmLabel} <span aria-hidden="true">→</span>
-          </span>
-        </button>
-      </aside>
-      <div className={styles.bottomRailSpacer} aria-hidden="true" />
+      {!hideBottomRail && (
+        <>
+          <aside className={styles.bottomRail} aria-live="polite">
+            <div className={styles.bottomRailLeft}>
+              <span className={styles.bottomRailEyebrow}>{copy.summaryLabel}</span>
+              <strong className={styles.bottomRailSeat}>
+                {selectedSeat ? selectedSeat.label : copy.emptySeatLabel}
+              </strong>
+            </div>
+            <span className={styles.bottomRailCount}>{countDisplay}</span>
+            <button
+              className={`${styles.bottomRailButton} ${confirmActive ? styles.bottomRailButtonActive : styles.bottomRailButtonIdle} ${confirmButtonState === "disabled" ? styles.bottomRailButtonDisabled : ""}`}
+              disabled={confirmButtonState === "disabled"}
+              type="button"
+              onClick={onConfirm}
+            >
+              <span className={styles.buttonText}>
+                {copy.confirmLabel} <span aria-hidden="true">→</span>
+              </span>
+            </button>
+          </aside>
+          <div className={styles.bottomRailSpacer} aria-hidden="true" />
+        </>
+      )}
     </section>
   );
 }

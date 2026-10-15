@@ -522,6 +522,7 @@ export function BookingExperience({
         }}
         confirmButtonState={isHolding ? "disabled" : selectedSeatId ? "active" : "auto"}
         summaryCountLabel={isHolding ? "Holding…" : selectedSeatId ? formatHoldTime(secondsRemaining) : "0 seats"}
+        hideBottomRail={detailsOpen || noSeatsOpen}
       />
       <YourDetailsModal
         open={detailsOpen}
