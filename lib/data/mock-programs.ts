@@ -107,7 +107,7 @@ export const MOCK_PROGRAMS: Program[] = [
   {
     id: "prog-3",
     slug: "sepetak-sunyi",
-    title: "Program Kronik",
+    title: "Layar Kronik",
     subtitle: "Sepetak Sunyi",
     description:
       "Kurasi film istimewa karya pegiat UKM Kronik Filmedia Universitas Diponegoro yang menelusuri keheningan, pergulatan batin, dan ruang keluarga.",
