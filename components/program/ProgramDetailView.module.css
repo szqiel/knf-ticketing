@@ -39,103 +39,6 @@
   flex-direction: column;
 }
 
-/* Header with BackButton, Progress Stepper, Mascot */
-.header {
-  height: 75px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-/* Back Button (Pink/Red glossy pill) */
-.backButton {
-  width: 112px;
-  height: 44px;
-  border-radius: 27px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 227, 227, 1) 18%,
-    rgba(255, 255, 255, 1) 37%,
-    rgba(255, 199, 199, 1) 77%,
-    rgba(242, 242, 242, 1) 100%
-  );
-  border: 1px solid #ea8c8c;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  text-decoration: none;
-  font-family: Arial, "Arial Narrow", sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  color: #111110;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.15s ease, filter 0.15s ease;
-  flex-shrink: 0;
-}
-
-.backButton:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.04);
-}
-
-.backArrow {
-  font-size: 16px;
-  font-weight: 900;
-}
-
-/* Booking Progress Stepper */
-.progressStepper {
-  width: 100%;
-  max-width: 396px;
-  height: 53px;
-  border-radius: 54px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.91) 0%,
-    rgba(187, 193, 255, 0) 100%
-  );
-  box-shadow: inset 0px 0px 4px 0px rgba(0, 0, 0, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-.stepActive {
-  font-family: Arial, "Arial Narrow", sans-serif;
-  font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: #000a69;
-  text-transform: uppercase;
-}
-
-.stepInactive {
-  font-family: Arial, "Arial Narrow", sans-serif;
-  font-weight: 400;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: #5e69cc;
-  text-transform: uppercase;
-}
-
-.stepDivider {
-  width: 40px;
-  height: 1.2px;
-  background-color: #5e69cc;
-}
-
-/* Mascot Logo */
-.mascotLogo {
-  width: 46px;
-  height: 46px;
-  object-fit: contain;
-  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.31));
-  flex-shrink: 0;
-}
-
 /* ==========================================================================
    Hero Program Banner Card (Node #102:222)
    Responsive grid preventing any overlap across all viewports
@@ -602,21 +505,6 @@
     padding: 16px;
   }
 
-  .header {
-    height: auto;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-    justify-content: space-between;
-  }
-
-  .progressStepper {
-    order: 3;
-    width: 100%;
-    max-width: 100%;
-    margin-top: 6px;
-  }
-
   .heroBanner {
     display: flex;
     flex-direction: column;
@@ -661,19 +549,3 @@
   }
 }
 
-@media (max-width: 480px) {
-  .progressStepper {
-    padding: 0 8px;
-    gap: 6px;
-    height: 44px;
-  }
-
-  .stepActive,
-  .stepInactive {
-    font-size: 9.5px;
-  }
-
-  .stepDivider {
-    width: 20px;
-  }
-}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { BookingExperience } from "@/components/booking/BookingExperience";
+import { KioskHeader } from "@/components/common/KioskHeader";
 import { SeatLegend } from "@/components/booking/SeatMap";
 import { ProgramTitle } from "@/components/home/ProgramTitle";
 import { createDemoSeats } from "@/lib/booking/mock-seats";
@@ -40,27 +41,8 @@ async function SeatMapContent({ params, searchParams }: SeatMapPageProps) {
   return (
     <main className={styles.page}>
       <div className={styles.stage}>
-        <header className={styles.topBar}>
-          <Link className={styles.backButton} href={`/p/${slug}`}>
-            <span aria-hidden="true">←</span> Back
-          </Link>
-
-          <div className={styles.stepper} aria-label="Booking progress">
-            <span className={styles.stepActive}>1 PROGRAM</span>
-            <i aria-hidden="true" />
-            <span className={styles.stepActive}>2 SEATS</span>
-            <i aria-hidden="true" />
-            <span>3 DONE</span>
-          </div>
-
-          <Image
-            className={styles.mascot}
-            src="/assets/knf-logo.png"
-            alt="KNF mascot"
-            width={88}
-            height={88}
-          />
-        </header>
+        {/* Unified Kiosk Header (Canonical Program Detail Back Button + Stepper + Mascot) */}
+        <KioskHeader currentStep={2} backHref={`/p/${slug}`} />
 
         <section className={styles.screenHeader}>
           <div className={styles.programTitle}>
@@ -85,13 +67,14 @@ async function SeatMapContent({ params, searchParams }: SeatMapPageProps) {
               summaryLabel: "YOUR SEATS",
               emptySeatLabel: "None selected",
               confirmLabel: "Confirm Seats",
+              swipeHint: "← Geser denah untuk memilih kursi →",
               legend: { available: "Available", selected: "Selected", booked: "Sold", blocked: "Sold" },
             },
             visuals: { canvasMinWidth: 0, seatMinSize: 20, seatGap: 3, canvasBottomPadding: 150 },
             layout: "cinema",
             showHeader: false,
             showLegend: false,
-            showSwipeHint: false,
+            showSwipeHint: true,
             showAvailability: false,
           }}
         />

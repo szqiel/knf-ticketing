@@ -465,14 +465,31 @@
 
   .swipeHint {
     display: block;
+    color: #55554f;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem;
+    text-align: center;
+  }
+
+  .cinemaViewport {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    width: 100%;
+    border-radius: 1.75rem;
   }
 
   .cinemaCanvas {
     border-radius: 1.75rem;
-    padding: 1.25rem 1rem 8rem;
+    box-sizing: border-box;
+    padding: 1.25rem 1.25rem 8rem;
+    width: max-content;
+    min-width: 100%;
   }
 
   .cinemaStage {
+    width: 56rem;
     min-width: 56rem;
   }
 

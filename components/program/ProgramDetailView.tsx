@@ -9,6 +9,7 @@ import { FilmDetailModal } from "./FilmDetailModal";
 import { NoSeatsModal } from "@/components/booking/NoSeatsModal";
 import { ProgramHeroTitle } from "./ProgramHeroTitle";
 import { LineupHeader } from "./LineupHeader";
+import { KioskHeader } from "@/components/common/KioskHeader";
 
 interface ProgramDetailViewProps {
   program: Program;
@@ -25,32 +26,7 @@ export function ProgramDetailView({ program }: ProgramDetailViewProps) {
     <main className={styles.pageWrapper}>
       <div className={styles.kioskCard}>
         {/* Header Bar */}
-        <header className={styles.header}>
-          {/* Back Button */}
-          <Link href="/" className={styles.backButton} aria-label="Kembali ke Beranda">
-            <span className={styles.backArrow}>←</span>
-            <span>Back</span>
-          </Link>
-
-          {/* Stepper Pill */}
-          <div className={styles.progressStepper} aria-label="Booking progress">
-            <span className={styles.stepActive}>1 Program</span>
-            <div className={styles.stepDivider} />
-            <span className={styles.stepInactive}>2 Seats</span>
-            <div className={styles.stepDivider} />
-            <span className={styles.stepInactive}>3 Done</span>
-          </div>
-
-          {/* Mascot Logo */}
-          <Image
-            src="/assets/knf-logo.png"
-            alt="KNF 2026 Mascot"
-            width={46}
-            height={46}
-            priority
-            className={styles.mascotLogo}
-          />
-        </header>
+        <KioskHeader currentStep={1} backHref="/" />
 
         {/* Hero Program Banner Card */}
         <section className={styles.heroBanner} aria-label="Detail Program">

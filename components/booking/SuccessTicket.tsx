@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { KioskHeader } from "@/components/common/KioskHeader";
 import type { BookingResponse } from "@/lib/contracts";
 import styles from "./SuccessTicket.module.css";
 
@@ -55,38 +56,12 @@ export function SuccessTicket({
   return (
     <main className={styles.page} aria-live="polite">
       <div className={styles.canvas}>
-        {/* Top Header Row (#179:14516) */}
-        <header className={styles.topBar}>
-          <Link
-            className={styles.backButton}
-            href={backHref}
-            onClick={(e) => {
-              e.preventDefault();
-              resetKioskAndNavigate(backHref);
-            }}
-          >
-            <span aria-hidden="true">←</span> Back
-          </Link>
-
-          <div className={styles.stepper} aria-label="Booking progress">
-            <span>1 PROGRAM</span>
-            <i aria-hidden="true" />
-            <span>2 SEATS</span>
-            <i aria-hidden="true" />
-            <span className={styles.stepActive}>3 DONE</span>
-          </div>
-
-          <div className={styles.logoWrapper}>
-            <Image
-              className={styles.logoImage}
-              src="/assets/knf-logo.png"
-              alt="KNF 26 Logo"
-              width={46}
-              height={46}
-              priority
-            />
-          </div>
-        </header>
+        {/* Unified Kiosk Header (Canonical Program Detail Back Button + Stepper + Mascot) */}
+        <KioskHeader
+          currentStep={3}
+          backHref={backHref}
+          onBack={() => resetKioskAndNavigate(backHref)}
+        />
 
         {/* Center Row: Selamat Bersinema + Button & Ticket Card (#102:1195) */}
         <section className={styles.confirmation} aria-label="Booking confirmed">
