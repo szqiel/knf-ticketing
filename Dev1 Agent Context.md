@@ -164,10 +164,14 @@ Every commit must strictly follow conventional commits with bullet points explai
   - **Count**: `"0 seats"` / `"1 seat"` (Arial 400 Regular, 12.8px, `#e7e7e3`).
   - **Idle Button (`102:970`)**: Height 60.8px, border radius 16px, border `1.6px solid #fff`, background `linear-gradient(180deg, #e7e7e3 33%, #a9a9a9 76%, #d5d5d5 99%)`, text gradient `linear-gradient(90deg, #000a69 0%, #0015cf 100%)`.
   - **Hovered / Active Button (`174:14504`)**: Height 60.8px, border radius 16px, border `1.6px solid #fff`, background `linear-gradient(180deg, #0015cf 33%, #000a69 76%, #808cff 99%)`, text `#ffffff`.
-  - **Scroll Non-Overlap Architecture**:
-    - Bar uses `position: sticky; bottom: 20px; z-index: 40;` to smoothly follow audience scroll.
-    - `.cinemaCanvas` bottom padding is set to `8.5rem` (~136px), plus canvas stage bottom distance of 47px.
-    - When audiences scroll all the way to the end, Row S seats are located > 120px safely ABOVE the bar, preventing any overlap or click blocking.
+  - **Scroll Following & Non-Overlap Architecture**:
+    - **Why `position: sticky` failed**: Ancestor `.page` had `overflow-x: hidden`, which in browser CSS creates an overflow clipping container that disables viewport sticky tracking. Additionally, sticky inside a flex shell stops sticking at the parent boundary.
+    - **The Solution**: Bar uses `position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 50;`. This guarantees the bar **always floats and follows the scroll** seamlessly across the entire viewport.
+    - **Preventing Bottom Row Overlap**:
+      - A companion `<div className={styles.bottomRailSpacer} />` (height 90px on desktop, 76px on tablet, 64px on mobile) is rendered in document flow right below the shell.
+      - `.cinemaCanvas` bottom padding is set to `8.5rem` (~136px), and `.stage` bottom padding to `6rem`.
+      - When audiences scroll all the way to the end, Row S seats are located > 160px safely ABOVE the confirmation bar.
+      - `.page` uses modern `overflow-x: clip;` instead of `overflow-x: hidden`.
 
 ---
 
