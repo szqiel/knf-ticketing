@@ -183,6 +183,25 @@
   text-align: center;
 }
 
+.rearLockNotice {
+  align-items: center;
+  background: rgb(0 21 207 / 7%);
+  border: 1px solid rgb(0 21 207 / 22%);
+  border-radius: 999px;
+  color: #0015cf;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 700;
+  gap: 0.4rem;
+  letter-spacing: 0.02em;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.9rem;
+}
+
+.lockIcon {
+  font-size: 0.75rem;
+}
+
 .cinemaStage {
   aspect-ratio: 2371 / 1344;
   position: relative;

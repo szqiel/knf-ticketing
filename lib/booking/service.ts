@@ -11,7 +11,13 @@ import {
 } from "@/lib/db/schema";
 import { BookingError } from "./errors";
 import { assertBookingSession } from "./sessions";
-import { isCinemaFrontUnavailable } from "./seat-layout";
+import {
+  isCinemaFrontUnavailable,
+  isFrontCinemaRow,
+  isRearCinemaRow,
+  isRearRowUnlocked,
+  REAR_ROW_UNLOCK_THRESHOLD,
+} from "./seat-layout";
 
 const HOLD_TTL_MS = 3 * 60 * 1000;
 
@@ -174,23 +180,45 @@ export async function getSeatMap(programId: string) {
   const reservationsBySeat = new Map(reservationRows.map((reservation) => [reservation.seatId, reservation]));
   const blockedSeatIds = new Set(blockedRows.map((blocked) => blocked.seatId));
 
+  const mappedSeats = seatRows.map((seat) => {
+    const reservation = reservationsBySeat.get(seat.id);
+    const activeStatus = reservation?.status === "held" || reservation?.status === "booked"
+      ? reservation.status
+      : undefined;
+    const status = blockedSeatIds.has(seat.id) || isCinemaFrontUnavailable(seat.rowName, seat.number)
+      ? "blocked"
+      : activeStatus ?? "available";
+
+    return {
+      ...seat,
+      status,
+      heldUntil: reservation?.status === "held" ? reservation.expiresAt?.toISOString() ?? null : null,
+    };
+  });
+
+  // Calculate cumulative front seats occupied (Rows A-H)
+  const frontOccupiedCount = mappedSeats.filter(
+    (s) => isFrontCinemaRow(s.rowName) && s.status !== "available",
+  ).length;
+
+  const rearUnlocked = isRearRowUnlocked(frontOccupiedCount);
+
+  // If front rows haven't reached 150 occupied seats, rear rows (J-S) are blocked/sold
+  const finalSeats = rearUnlocked
+    ? mappedSeats
+    : mappedSeats.map((seat) => {
+        if (isRearCinemaRow(seat.rowName)) {
+          return {
+            ...seat,
+            status: "blocked" as const,
+          };
+        }
+        return seat;
+      });
+
   return {
     programId,
-    seats: seatRows.map((seat) => {
-      const reservation = reservationsBySeat.get(seat.id);
-      const activeStatus = reservation?.status === "held" || reservation?.status === "booked"
-        ? reservation.status
-        : undefined;
-      const status = blockedSeatIds.has(seat.id) || isCinemaFrontUnavailable(seat.rowName, seat.number)
-        ? "blocked"
-        : activeStatus ?? "available";
-
-      return {
-        ...seat,
-        status,
-        heldUntil: reservation?.status === "held" ? reservation.expiresAt?.toISOString() ?? null : null,
-      };
-    }),
+    seats: finalSeats,
     generatedAt: new Date().toISOString(),
   };
 }
@@ -228,6 +256,47 @@ export async function holdSeat(programId: string, seatId: string, sessionToken: 
 
       if (isCinemaFrontUnavailable(seat.rowName, seat.number)) {
         throw new BookingError("That seat is unavailable.", "SEAT_BLOCKED");
+      }
+
+      if (isRearCinemaRow(seat.rowName)) {
+        // Enforce progressive front-row rule: rear rows J-S are locked until front rows A-H reach 150 occupied seats
+        const allSeats = await tx.select({ id: seats.id, rowName: seats.rowName, number: seats.number }).from(seats);
+        const frontSeatList = allSeats.filter((s) => isFrontCinemaRow(s.rowName));
+        const frontSeatIdSet = new Set(frontSeatList.map((s) => s.id));
+
+        const [programReservations, programBlocked] = await Promise.all([
+          tx
+            .select({ seatId: reservations.seatId, status: reservations.status })
+            .from(reservations)
+            .where(
+              and(
+                eq(reservations.programId, programId),
+                sql`${reservations.status} IN ('held', 'booked')`,
+              ),
+            ),
+          tx
+            .select({ seatId: blockedSeats.seatId })
+            .from(blockedSeats)
+            .where(eq(blockedSeats.programId, programId)),
+        ]);
+
+        const occupiedFrontIds = new Set<string>();
+        for (const r of programReservations) {
+          if (frontSeatIdSet.has(r.seatId)) occupiedFrontIds.add(r.seatId);
+        }
+        for (const b of programBlocked) {
+          if (frontSeatIdSet.has(b.seatId)) occupiedFrontIds.add(b.seatId);
+        }
+        for (const s of frontSeatList) {
+          if (isCinemaFrontUnavailable(s.rowName, s.number)) occupiedFrontIds.add(s.id);
+        }
+
+        if (occupiedFrontIds.size < REAR_ROW_UNLOCK_THRESHOLD) {
+          throw new BookingError(
+            `Baris belakang (J–S) belum dibuka. Baris depan baru terisi ${occupiedFrontIds.size}/${REAR_ROW_UNLOCK_THRESHOLD} kursi.`,
+            "SEAT_BLOCKED",
+          );
+        }
       }
 
       const [blocked] = await tx

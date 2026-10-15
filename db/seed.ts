@@ -71,7 +71,7 @@ async function seed() {
         .map((seat) => ({
           programId: program.id,
           seatId: seat.id,
-          reason: "Front-center row unavailable",
+          reason: "Front-center reserved (A10-20, B10-21, C10-22, D10-22)",
         })),
     );
 
