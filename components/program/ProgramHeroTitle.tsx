@@ -9,6 +9,42 @@ interface ProgramHeroTitleProps {
   isSoldOut?: boolean;
 }
 
+/**
+ * Intelligently splits a long program title into 2 balanced lines
+ * at natural word boundaries so it never overflows or collides with buttons.
+ */
+function getTitleLines(title: string): string[] {
+  const cleanTitle = title.trim();
+  if (cleanTitle.length <= 15) {
+    return [cleanTitle];
+  }
+
+  const words = cleanTitle.split(/\s+/);
+  if (words.length <= 1) {
+    return [cleanTitle];
+  }
+
+  // Find optimal split point near the middle of character length
+  const halfLength = cleanTitle.length / 2;
+  let bestSplitIndex = 1;
+  let minDiff = Infinity;
+  let accumulated = 0;
+
+  for (let i = 0; i < words.length - 1; i++) {
+    accumulated += words[i].length + (i > 0 ? 1 : 0);
+    const diff = Math.abs(accumulated - halfLength);
+    if (diff < minDiff) {
+      minDiff = diff;
+      bestSplitIndex = i + 1;
+    }
+  }
+
+  const line1 = words.slice(0, bestSplitIndex).join(" ");
+  const line2 = words.slice(bestSplitIndex).join(" ");
+
+  return [line1, line2];
+}
+
 export function ProgramHeroTitle({
   title,
   subtitle,
@@ -23,20 +59,29 @@ export function ProgramHeroTitle({
   const festShadowId = `festShadow-${uid}`;
 
   const hasSubtitle = Boolean(subtitle);
-  const svgHeight = hasSubtitle ? 120 : 95;
-  const viewBox = `0 0 540 ${svgHeight}`;
+  const titleLines = getTitleLines(title);
+  const isMultiLine = titleLines.length > 1;
+
+  // Calculate SVG height and coordinates dynamically
+  let svgHeight = 88;
+  if (isMultiLine) {
+    svgHeight = hasSubtitle ? 168 : 130;
+  } else if (hasSubtitle) {
+    svgHeight = 120;
+  }
+
+  const viewBox = `0 0 460 ${svgHeight}`;
 
   return (
     <div className={styles.container}>
       <svg
         viewBox={viewBox}
         className={styles.titleSvg}
-        style={{ height: hasSubtitle ? "120px" : "95px" }}
         role="img"
         aria-label={`Festival Programs - ${title}${subtitle ? ` - ${subtitle}` : ""}`}
       >
         <defs>
-          {/* Exact blue chrome gradient fill from Figma */}
+          {/* Blue chrome gradient fill matching Figma */}
           <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#0015CF" />
             <stop offset="16%" stopColor="#0015CF" />
@@ -46,7 +91,7 @@ export function ProgramHeroTitle({
             <stop offset="100%" stopColor="#0015CF" />
           </linearGradient>
 
-          {/* Exact multi-stop outline from Figma node #113:286 & #104:369 */}
+          {/* Multi-stop outline matching Figma */}
           <linearGradient id={strokeId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#0011AD" />
             <stop offset="21%" stopColor="#CFD4FD" />
@@ -57,7 +102,7 @@ export function ProgramHeroTitle({
             <stop offset="100%" stopColor="#0011AD" />
           </linearGradient>
 
-          {/* Dual Drop Shadow for Main Title */}
+          {/* Drop Shadow for Main Title */}
           <filter id={shadowId} x="-10%" y="-30%" width="125%" height="160%">
             <feDropShadow
               dx="0"
@@ -75,7 +120,7 @@ export function ProgramHeroTitle({
             />
           </filter>
 
-          {/* Drop Shadow for Festival Programs node #104:373 */}
+          {/* Drop Shadow for Festival Programs */}
           <filter id={festShadowId} x="-10%" y="-30%" width="125%" height="160%">
             <feDropShadow
               dx="0"
@@ -87,10 +132,10 @@ export function ProgramHeroTitle({
           </filter>
         </defs>
 
-        {/* 1. "Festival Programs" (Node #104:373) */}
+        {/* 1. "Festival Programs" Header */}
         <text
           x="2"
-          y="30"
+          y="26"
           className={styles.festivalText}
           fill="#FFFFFF"
           stroke={`url(#${strokeId})`}
@@ -101,25 +146,54 @@ export function ProgramHeroTitle({
           Festival Programs
         </text>
 
-        {/* 2. Program Title (Node #104:369, e.g. "Goresan Awal") */}
-        <text
-          x="2"
-          y="76"
-          className={styles.programTitleText}
-          fill={isSoldOut ? "#A5A5A5" : `url(#${fillId})`}
-          stroke={isSoldOut ? "none" : `url(#${strokeId})`}
-          strokeWidth={isSoldOut ? "0" : "1.8"}
-          paintOrder="stroke fill"
-          filter={isSoldOut ? "none" : `url(#${shadowId})`}
-        >
-          {title}
-        </text>
+        {/* 2. Program Title (Single or Multi-line) */}
+        {isMultiLine ? (
+          <>
+            <text
+              x="2"
+              y="68"
+              className={styles.programTitleMultiLine}
+              fill={isSoldOut ? "#A5A5A5" : `url(#${fillId})`}
+              stroke={isSoldOut ? "none" : `url(#${strokeId})`}
+              strokeWidth={isSoldOut ? "0" : "1.6"}
+              paintOrder="stroke fill"
+              filter={isSoldOut ? "none" : `url(#${shadowId})`}
+            >
+              {titleLines[0]}
+            </text>
+            <text
+              x="2"
+              y="110"
+              className={styles.programTitleMultiLine}
+              fill={isSoldOut ? "#A5A5A5" : `url(#${fillId})`}
+              stroke={isSoldOut ? "none" : `url(#${strokeId})`}
+              strokeWidth={isSoldOut ? "0" : "1.6"}
+              paintOrder="stroke fill"
+              filter={isSoldOut ? "none" : `url(#${shadowId})`}
+            >
+              {titleLines[1]}
+            </text>
+          </>
+        ) : (
+          <text
+            x="2"
+            y="68"
+            className={title.length > 12 ? styles.programTitleMedium : styles.programTitleLarge}
+            fill={isSoldOut ? "#A5A5A5" : `url(#${fillId})`}
+            stroke={isSoldOut ? "none" : `url(#${strokeId})`}
+            strokeWidth={isSoldOut ? "0" : "1.8"}
+            paintOrder="stroke fill"
+            filter={isSoldOut ? "none" : `url(#${shadowId})`}
+          >
+            {title}
+          </text>
+        )}
 
         {/* 3. Subtitle (if available) */}
         {subtitle && (
           <text
             x="2"
-            y="104"
+            y={isMultiLine ? 144 : 102}
             className={styles.subtitleText}
             fill={isSoldOut ? "#8C8C8C" : `url(#${fillId})`}
           >

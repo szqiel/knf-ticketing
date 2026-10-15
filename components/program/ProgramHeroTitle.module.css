@@ -1,6 +1,7 @@
 /* ==========================================================================
    PROGRAM HERO TITLE
    Renders Festival Programs & Program Title matching Figma #104:373 & #104:369
+   Zero-overlap responsive architecture with SVG dynamic viewBox
    ========================================================================== */
 
 .container {
@@ -8,14 +9,15 @@
   flex-direction: column;
   width: 100%;
   min-width: 0;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .titleSvg {
   width: 100%;
-  max-width: 540px;
-  overflow: visible;
+  max-width: 460px;
+  height: auto;
   display: block;
+  overflow: hidden;
 }
 
 /* Festival Programs typography (Node #104:373) */
@@ -24,29 +26,51 @@
   font-stretch: condensed;
   font-style: italic;
   font-weight: 400;
-  font-size: 34px;
-  letter-spacing: -0.07em;
+  font-size: 26px;
+  letter-spacing: -0.05em;
   user-select: none;
 }
 
-/* Program Title typography (Node #104:369) */
-.programTitleText {
+/* Single-line Program Title (Short Titles) */
+.programTitleLarge {
   font-family: "Arial Narrow", Arial, sans-serif;
   font-stretch: condensed;
   font-style: italic;
   font-weight: 700;
-  font-size: 56px;
+  font-size: 52px;
   letter-spacing: -0.02em;
   user-select: none;
 }
 
-/* Subtitle */
+/* Single-line Program Title (Medium Titles) */
+.programTitleMedium {
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-stretch: condensed;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 44px;
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+
+/* Multi-line Program Title (Long Titles like "Layar Sebelum Kemana-mana") */
+.programTitleMultiLine {
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-stretch: condensed;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 38px;
+  letter-spacing: -0.02em;
+  user-select: none;
+}
+
+/* Subtitle (e.g. Minikino Indonesia Raja...) */
 .subtitleText {
   font-family: "Arial Narrow", Arial, sans-serif;
   font-stretch: condensed;
   font-style: italic;
   font-weight: 400;
-  font-size: 18px;
+  font-size: 15px;
   letter-spacing: 0;
   user-select: none;
 }

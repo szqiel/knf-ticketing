@@ -87,7 +87,8 @@
 
 /* Booking Progress Stepper */
 .progressStepper {
-  width: 396px;
+  width: 100%;
+  max-width: 396px;
   height: 53px;
   border-radius: 54px;
   background: linear-gradient(
@@ -141,9 +142,9 @@
    ========================================================================== */
 .heroBanner {
   display: grid;
-  grid-template-columns: 250px minmax(0, 1fr) 220px;
-  gap: 28px;
-  padding: 28px 24px;
+  grid-template-columns: 240px minmax(0, 1fr) 200px;
+  gap: 24px;
+  padding: 24px;
   border-radius: 33px;
   background: linear-gradient(
     180deg,
@@ -162,9 +163,9 @@
 
 /* Hero Poster Box (Exact standard 2:3 poster ratio) */
 .bannerPoster {
-  width: 250px;
+  width: 100%;
+  max-width: 240px;
   aspect-ratio: 2 / 3;
-  max-width: 100%;
   border-radius: 20px;
   background: linear-gradient(
     180deg,
@@ -229,6 +230,7 @@
   justify-content: center;
   gap: 6px;
   min-width: 0;
+  overflow: hidden;
 }
 
 .programDescription {
@@ -278,9 +280,11 @@
 .bannerAction {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
+  align-items: flex-end;
   gap: 14px;
   flex-shrink: 0;
+  min-width: 180px;
 }
 
 .statusBadge {
@@ -556,18 +560,23 @@
    Smoothly adapts without any element collisions
    ========================================================================== */
 
-/* Tablet / Medium Screens (<= 1150px down to 769px) */
-@media (max-width: 1150px) {
+/* Tablet / Medium Screens (<= 1120px down to 769px) */
+@media (max-width: 1120px) {
   .heroBanner {
-    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-columns: 200px minmax(0, 1fr);
     gap: 20px;
     padding: 24px 20px;
+    align-items: flex-start;
   }
 
   .bannerPoster {
-    width: 220px;
+    max-width: 200px;
     aspect-ratio: 2 / 3;
-    height: auto;
+    grid-row: 1 / span 2;
+  }
+
+  .bannerInfo {
+    grid-column: 2;
   }
 
   .bannerAction {
@@ -577,6 +586,8 @@
     justify-content: flex-start;
     gap: 16px;
     margin-top: 10px;
+    min-width: 0;
+    width: auto;
   }
 
   .movieGrid {
@@ -596,25 +607,27 @@
     gap: 12px;
     flex-wrap: wrap;
     margin-bottom: 16px;
+    justify-content: space-between;
   }
 
   .progressStepper {
     order: 3;
     width: 100%;
+    max-width: 100%;
     margin-top: 6px;
   }
 
   .heroBanner {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 18px;
     padding: 20px 16px;
   }
 
   .bannerPoster {
     width: 100%;
-    max-width: 240px;
+    max-width: 200px;
     aspect-ratio: 2 / 3;
     height: auto;
     margin: 0 auto;
@@ -630,9 +643,11 @@
 
   .bannerAction {
     width: 100%;
+    max-width: 100%;
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+    margin-top: 6px;
   }
 
   .chooseSeatButton,
@@ -643,5 +658,22 @@
   .movieGrid {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .progressStepper {
+    padding: 0 8px;
+    gap: 6px;
+    height: 44px;
+  }
+
+  .stepActive,
+  .stepInactive {
+    font-size: 9.5px;
+  }
+
+  .stepDivider {
+    width: 20px;
   }
 }
