@@ -13,7 +13,8 @@ export class BookingError extends Error {
       | "PERSON_ALREADY_BOOKED"
       | "IDEMPOTENCY_CONFLICT"
       | "BOOKING_NOT_FOUND"
-      | "BOOKING_CANCELLED",
+      | "BOOKING_CANCELLED"
+      | "FILM_NOT_FOUND",
   ) {
     super(message);
     this.name = "BookingError";
@@ -22,7 +23,7 @@ export class BookingError extends Error {
 
 export function bookingErrorStatus(code: BookingError["code"]) {
   if (code === "SESSION_INVALID") return 401;
-  if (code === "PROGRAM_NOT_FOUND" || code === "SEAT_NOT_FOUND" || code === "BOOKING_NOT_FOUND") return 404;
+  if (code === "PROGRAM_NOT_FOUND" || code === "SEAT_NOT_FOUND" || code === "BOOKING_NOT_FOUND" || code === "FILM_NOT_FOUND") return 404;
   if (
     code === "SEAT_UNAVAILABLE" ||
     code === "SEAT_BLOCKED" ||

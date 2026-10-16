@@ -1,101 +1,345 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { AdminLayout } from "./AdminLayout";
 import styles from "./AdminDashboard.module.css";
+import { RefreshCw } from "lucide-react";
 
-type Program = { id: string; title: string; dayLabel: string | null; bookingOpen: boolean };
-type AdminSeat = { id: string; label: string; rowName: string; number: number; status: "available" | "held" | "booked" | "blocked"; fixedBlocked: boolean; blockedReason: string | null };
-type AudienceRow = { bookingId: string; programTitle: string; seatLabel: string | null; fullName: string; contact: string; status: "booked" | "cancelled"; source: string; createdAt: string; cancelledReason: string | null };
+type Program = {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  dayLabel: string | null;
+  startsAt: string | null;
+  endsAt: string | null;
+  bookingOpen: boolean;
+};
+
+type AdminSeat = {
+  id: string;
+  label: string;
+  rowName: string;
+  number: number;
+  status: "available" | "held" | "booked" | "blocked";
+  fixedBlocked: boolean;
+  blockedReason: string | null;
+};
+
+type FestivalKpis = {
+  totalPrograms: number;
+  openProgramsCount: number;
+  totalBookings: number;
+  validBookings: number;
+  cancelledBookings: number;
+};
 
 async function readJson<T>(url: string, init?: RequestInit) {
-  const response = await fetch(url, { ...init, headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) } });
+  const response = await fetch(url, {
+    ...init,
+    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+  });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body.error ?? "Request failed");
   return body as T;
 }
 
 export default function AdminDashboard() {
-  const router = useRouter();
   const [programs, setPrograms] = useState<Program[]>([]);
   const [programId, setProgramId] = useState("");
   const [seats, setSeats] = useState<AdminSeat[]>([]);
-  const [audience, setAudience] = useState<AudienceRow[]>([]);
+  const [kpis, setKpis] = useState<FestivalKpis | null>(null);
   const [loading, setLoading] = useState(true);
   const [busySeat, setBusySeat] = useState<string | null>(null);
+  const [isTogglingBooking, setIsTogglingBooking] = useState(false);
   const [error, setError] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
 
-  const loadPrograms = useCallback(async () => {
-    const data = await readJson<{ programs: Program[] }>("/api/admin/programs");
-    setPrograms(data.programs);
-    setProgramId((current) => current || data.programs[0]?.id || "");
+  const loadInitialData = useCallback(async () => {
+    try {
+      const [progData, kpiData] = await Promise.all([
+        readJson<{ programs: Program[] }>("/api/admin/programs"),
+        readJson<FestivalKpis>("/api/admin/kpis"),
+      ]);
+      setPrograms(progData.programs);
+      setKpis(kpiData);
+      setProgramId((curr) => curr || progData.programs[0]?.id || "");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load initial data");
+    } finally {
+      setLoading(false);
+    }
   }, []);
-  const loadProgramData = useCallback(async (id: string) => {
+
+  const loadSeatMap = useCallback(async (id: string) => {
     if (!id) return;
-    const [seatData, audienceData] = await Promise.all([
-      readJson<{ seats: AdminSeat[] }>(`/api/admin/programs/${id}/seats`),
-      readJson<{ rows: AudienceRow[] }>(`/api/admin/audience?programId=${id}`),
-    ]);
-    setSeats(seatData.seats);
-    setAudience(audienceData.rows);
+    try {
+      const seatData = await readJson<{ seats: AdminSeat[] }>(`/api/admin/programs/${id}/seats`);
+      setSeats(seatData.seats);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load seat map");
+    }
   }, []);
 
   useEffect(() => {
     let active = true;
-    // Data-fetch effects update state after the async request resolves.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadPrograms().catch((e) => { if (active) setError(e.message); }).finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [loadPrograms]);
+    void loadInitialData();
+    return () => {
+      active = false;
+    };
+  }, [loadInitialData]);
+
   useEffect(() => {
-    let active = true;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (programId) void loadProgramData(programId).catch((e) => { if (active) setError(e.message); });
-    return () => { active = false; };
-  }, [programId, loadProgramData]);
+    if (programId) void loadSeatMap(programId);
+  }, [programId, loadSeatMap]);
+
+  // Real-time SSE stream
   useEffect(() => {
     if (!programId) return;
     const source = new EventSource(`/api/programs/${programId}/stream`);
-    const refresh = () => void loadProgramData(programId).catch((e) => setError(e.message));
+    const refresh = () => {
+      void loadSeatMap(programId);
+      void readJson<FestivalKpis>("/api/admin/kpis").then(setKpis).catch(() => {});
+    };
     source.addEventListener("seats_changed", refresh);
-    return () => { source.removeEventListener("seats_changed", refresh); source.close(); };
-  }, [programId, loadProgramData]);
+    return () => {
+      source.removeEventListener("seats_changed", refresh);
+      source.close();
+    };
+  }, [programId, loadSeatMap]);
 
-  const rows = useMemo(() => [...new Set(seats.map((seat) => seat.rowName))].sort(), [seats]);
+  const selectedProgram = useMemo(
+    () => programs.find((p) => p.id === programId),
+    [programs, programId],
+  );
+
+  const rows = useMemo(
+    () => [...new Set(seats.map((seat) => seat.rowName))].sort(),
+    [seats],
+  );
+
+  const availableCount = useMemo(
+    () => seats.filter((s) => s.status === "available").length,
+    [seats],
+  );
+  const bookedCount = useMemo(
+    () => seats.filter((s) => s.status === "booked").length,
+    [seats],
+  );
+  const heldCount = useMemo(
+    () => seats.filter((s) => s.status === "held").length,
+    [seats],
+  );
+  const blockedCount = useMemo(
+    () => seats.filter((s) => s.status === "blocked").length,
+    [seats],
+  );
+
   const toggleSeat = async (seat: AdminSeat) => {
     if (seat.fixedBlocked || busySeat || ["held", "booked"].includes(seat.status)) return;
-    setBusySeat(seat.id); setError("");
+    setBusySeat(seat.id);
+    setError("");
     try {
-      const data = await readJson<{ seats: AdminSeat[] }>(`/api/admin/programs/${programId}/seats`, { method: "PATCH", body: JSON.stringify({ seatId: seat.id, blocked: seat.status !== "blocked" }) });
+      const data = await readJson<{ seats: AdminSeat[] }>(
+        `/api/admin/programs/${programId}/seats`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            seatId: seat.id,
+            blocked: seat.status !== "blocked",
+          }),
+        },
+      );
       setSeats(data.seats);
-    } catch (e) { setError(e instanceof Error ? e.message : "Unable to update seat"); } finally { setBusySeat(null); }
-  };
-  const cancelBooking = async (row: AudienceRow) => {
-    if (row.status === "cancelled" || !confirm(`Cancel booking ${row.bookingId.slice(0, 8)}?`)) return;
-    try {
-      await readJson(`/api/admin/audience/${row.bookingId}/cancel`, { method: "POST", body: JSON.stringify({ programId, reason: "Cancelled by staff" }) });
-      await loadProgramData(programId);
-    } catch (e) { setError(e instanceof Error ? e.message : "Unable to cancel booking"); }
-  };
-  const reloadAudience = async () => {
-    const query = new URLSearchParams({ programId }); if (from) query.set("from", from); if (to) query.set("to", to);
-    try { setAudience((await readJson<{ rows: AudienceRow[] }>(`/api/admin/audience?${query}`)).rows); } catch (e) { setError(e instanceof Error ? e.message : "Unable to load audience"); }
-  };
-  const downloadReport = (format: "xlsx" | "pdf") => {
-    const query = new URLSearchParams({ format, programId }); if (from) query.set("from", from); if (to) query.set("to", to);
-    const link = document.createElement("a");
-    link.href = `/api/admin/reports/export?${query}`;
-    link.click();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to update seat");
+    } finally {
+      setBusySeat(null);
+    }
   };
 
-  if (loading) return <main className={styles.page}><p>Loading admin panel…</p></main>;
-  return <main className={styles.page}>
-    <header className={styles.header}><div><p className={styles.eyebrow}>KNF 2026 / STAFF</p><h1>Admin operations</h1><p>Monitor audience, release bookings, and block seats in real time.</p></div><button className={styles.secondary} onClick={async () => { await fetch("/api/admin/logout", { method: "POST" }); router.replace("/admin/login"); }}>Log out</button></header>
-    {error && <div className={styles.error}>{error}</div>}
-    <section className={styles.toolbar}><label>Program<select value={programId} onChange={(e) => setProgramId(e.target.value)}>{programs.map((program) => <option key={program.id} value={program.id}>{program.title} · {program.dayLabel ?? "No day"}</option>)}</select></label><span className={programs.find((p) => p.id === programId)?.bookingOpen ? styles.open : styles.closed}>{programs.find((p) => p.id === programId)?.bookingOpen ? "Booking open" : "Booking closed"}</span></section>
-    <section className={styles.card}><div className={styles.sectionTitle}><div><p className={styles.eyebrow}>LIVE SEAT BLOCKER</p><h2>Seat map</h2></div><p>Click available seats to block or unblock them. Gray seats are fixed or unavailable.</p></div><div className={styles.seatGrid}>{rows.map((row) => <div className={styles.seatRow} key={row}><span className={styles.rowLabel}>{row}</span>{seats.filter((seat) => seat.rowName === row).sort((a,b) => a.number-b.number).map((seat) => <button key={seat.id} title={seat.blockedReason ?? seat.status} disabled={seat.fixedBlocked || ["held", "booked"].includes(seat.status)} className={`${styles.seat} ${styles[seat.status]} ${seat.fixedBlocked ? styles.fixed : ""}`} onClick={() => void toggleSeat(seat)}>{seat.number}</button>)}</div>)}</div><div className={styles.legend}><span><i className={styles.available} />Available</span><span><i className={styles.blocked} />Blocked</span><span><i className={styles.booked} />Booked/held</span></div></section>
-    <section className={styles.card}><div className={styles.sectionTitle}><div><p className={styles.eyebrow}>AUDIENCE LIST</p><h2>{audience.length} bookings</h2></div><button className={styles.secondary} onClick={() => void reloadAudience()}>Refresh</button></div><div className={styles.filters}><label>From<input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></label><label>To<input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></label><button className={styles.primary} onClick={() => void reloadAudience()}>Apply filters</button><button className={styles.secondary} onClick={() => downloadReport("xlsx")}>Export Excel</button><button className={styles.secondary} onClick={() => downloadReport("pdf")}>Export PDF</button></div><div className={styles.tableWrap}><table><thead><tr><th>Name</th><th>Contact</th><th>Seat</th><th>Status</th><th>Created</th><th /></tr></thead><tbody>{audience.map((row) => <tr key={row.bookingId}><td>{row.fullName}</td><td>{row.contact}</td><td>{row.seatLabel ?? "—"}</td><td><span className={row.status === "booked" ? styles.statusBooked : styles.statusCancelled}>{row.status}</span></td><td>{new Date(row.createdAt).toLocaleString("id-ID")}</td><td><button className={styles.cancel} disabled={row.status === "cancelled"} onClick={() => void cancelBooking(row)}>Cancel</button></td></tr>)}</tbody></table>{audience.length === 0 && <p className={styles.empty}>No bookings for this program.</p>}</div></section>
-  </main>;
+  const handleToggleBooking = async () => {
+    if (!selectedProgram || isTogglingBooking) return;
+    setIsTogglingBooking(true);
+    setError("");
+    const newStatus = !selectedProgram.bookingOpen;
+    try {
+      const res = await readJson<{ program: Program }>(`/api/admin/programs/${programId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ bookingOpen: newStatus }),
+      });
+      setPrograms((prev) =>
+        prev.map((p) => (p.id === programId ? { ...p, bookingOpen: res.program.bookingOpen } : p)),
+      );
+      void readJson<FestivalKpis>("/api/admin/kpis").then(setKpis).catch(() => {});
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to toggle booking status");
+    } finally {
+      setIsTogglingBooking(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div style={{ textAlign: "center", padding: "60px 0", color: "#94a3b8" }}>
+          Loading festival operations center…
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  return (
+    <AdminLayout>
+      <div className={styles.pageWrapper}>
+        {error && <div className={styles.errorBanner}>{error}</div>}
+
+        {/* Festival KPI Cards */}
+        <section className={styles.kpiGrid}>
+          <div className={styles.kpiCard}>
+            <p className={styles.kpiLabel}>Total Festival Bookings</p>
+            <p className={styles.kpiValue}>{kpis?.validBookings ?? 0}</p>
+            <p className={styles.kpiSub}>{kpis?.cancelledBookings ?? 0} tickets cancelled</p>
+          </div>
+          <div className={styles.kpiCard}>
+            <p className={styles.kpiLabel}>Selected Program Available</p>
+            <p className={styles.kpiValue} style={{ color: "#38bdf8" }}>
+              {availableCount}
+            </p>
+            <p className={styles.kpiSub}>Seats ready for booking</p>
+          </div>
+          <div className={styles.kpiCard}>
+            <p className={styles.kpiLabel}>Selected Program Booked</p>
+            <p className={styles.kpiValue} style={{ color: "#f43f5e" }}>
+              {bookedCount}
+            </p>
+            <p className={styles.kpiSub}>{heldCount} seats currently on hold</p>
+          </div>
+          <div className={styles.kpiCard}>
+            <p className={styles.kpiLabel}>Open Screenings</p>
+            <p className={styles.kpiValue} style={{ color: "#4ade80" }}>
+              {kpis?.openProgramsCount ?? 0} / {kpis?.totalPrograms ?? 8}
+            </p>
+            <p className={styles.kpiSub}>Programs accepting reservations</p>
+          </div>
+        </section>
+
+        {/* Program Control Toolbar */}
+        <section className={styles.controlCard}>
+          <div className={styles.programSelectGroup}>
+            <label htmlFor="prog-select" className={styles.selectLabel}>
+              Active Program:
+            </label>
+            <select
+              id="prog-select"
+              className={styles.programSelect}
+              value={programId}
+              onChange={(e) => setProgramId(e.target.value)}
+            >
+              {programs.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title} {p.subtitle ? `· ${p.subtitle}` : ""} ({p.dayLabel ?? "Festival"})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.statusToggleGroup}>
+            <span className={selectedProgram?.bookingOpen ? styles.statusBadgeOpen : styles.statusBadgeClosed}>
+              {selectedProgram?.bookingOpen ? "● BOOKING OPEN" : "○ BOOKING CLOSED"}
+            </span>
+            <button
+              onClick={handleToggleBooking}
+              disabled={isTogglingBooking}
+              className={`${styles.toggleBtn} ${selectedProgram?.bookingOpen ? styles.btnOpen : styles.btnClose}`}
+            >
+              {isTogglingBooking
+                ? "Updating..."
+                : selectedProgram?.bookingOpen
+                ? "Close Bookings Now"
+                : "Open Bookings Now"}
+            </button>
+            <button
+              onClick={() => {
+                void loadSeatMap(programId);
+                void readJson<FestivalKpis>("/api/admin/kpis").then(setKpis).catch(() => {});
+              }}
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                color: "#94a3b8",
+                padding: "8px 12px",
+                borderRadius: "8px",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+              title="Refresh seat grid"
+            >
+              <RefreshCw size={14} />
+            </button>
+          </div>
+        </section>
+
+        {/* Live Cinema Hall Seat Blocker Grid */}
+        <section className={styles.seatMapCard}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <p className={styles.sectionEyebrow}>LIVE HALL SEAT BLOCKER</p>
+              <h2 className={styles.sectionTitle}>
+                {selectedProgram?.title}: {seats.length} Total Physical Seats
+              </h2>
+            </div>
+            <div className={styles.legendBar}>
+              <span className={styles.legendItem}>
+                <i className={`${styles.legendDot} ${styles.dotAvailable}`} /> Available ({availableCount})
+              </span>
+              <span className={styles.legendItem}>
+                <i className={`${styles.legendDot} ${styles.dotHeld}`} /> On Hold ({heldCount})
+              </span>
+              <span className={styles.legendItem}>
+                <i className={`${styles.legendDot} ${styles.dotBooked}`} /> Booked ({bookedCount})
+              </span>
+              <span className={styles.legendItem}>
+                <i className={`${styles.legendDot} ${styles.dotBlocked}`} /> Blocked ({blockedCount})
+              </span>
+              <span className={styles.legendItem}>
+                <i className={`${styles.legendDot} ${styles.dotFixed}`} /> Fixed VIP / Sound Booth
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.seatScrollArea}>
+            {rows.map((row) => (
+              <div className={styles.seatRow} key={row}>
+                <span className={styles.rowLabel}>{row}</span>
+                {seats
+                  .filter((seat) => seat.rowName === row)
+                  .sort((a, b) => a.number - b.number)
+                  .map((seat) => {
+                    let seatClass = styles.seatAvailable;
+                    if (seat.fixedBlocked) seatClass = styles.seatFixed;
+                    else if (seat.status === "held") seatClass = styles.seatHeld;
+                    else if (seat.status === "booked") seatClass = styles.seatBooked;
+                    else if (seat.status === "blocked") seatClass = styles.seatBlocked;
+
+                    return (
+                      <button
+                        key={seat.id}
+                        title={`Seat ${seat.label} - ${seat.blockedReason ?? seat.status.toUpperCase()}`}
+                        disabled={seat.fixedBlocked || ["held", "booked"].includes(seat.status)}
+                        className={`${styles.seatBtn} ${seatClass}`}
+                        onClick={() => void toggleSeat(seat)}
+                      >
+                        {seat.number}
+                      </button>
+                    );
+                  })}
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </AdminLayout>
+  );
 }

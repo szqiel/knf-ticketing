@@ -4,6 +4,8 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./login.module.css";
 
+import Image from "next/image";
+
 export default function AdminLoginPage() {
   const router = useRouter();
   const [password, setPassword] = useState("");
@@ -29,10 +31,15 @@ export default function AdminLoginPage() {
   return (
     <main className={styles.page}>
       <form className={styles.card} onSubmit={submit}>
-        <p className={styles.eyebrow}>KNF26 STAFF</p>
-        <h1>Admin login</h1>
-        <p>Masuk untuk mengelola kursi dan audience booking.</p>
-        <label htmlFor="admin-password">Shared password</label>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+          <Image src="/assets/knf-logo.png" alt="KNF 2026 Mascot" width={48} height={48} priority />
+          <div>
+            <p className={styles.eyebrow}>KNF 2026 STAFF</p>
+            <h1 style={{ fontSize: "1.6rem", margin: 0 }}>Portal Login</h1>
+          </div>
+        </div>
+        <p style={{ fontSize: "0.85rem", color: "#475569" }}>Masuk untuk mengelola tiket, denah kursi, dan CMS festival.</p>
+        <label htmlFor="admin-password">Staff Password</label>
         <input id="admin-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} required autoFocus />
         {error && <p className={styles.error} role="alert">{error}</p>}
         <button type="submit" disabled={isSubmitting}>{isSubmitting ? "Signing in…" : "Sign in →"}</button>
