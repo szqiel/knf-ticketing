@@ -7,9 +7,10 @@ interface ProgramTitleProps {
   title: string;
   subtitle?: string;
   isSoldOut: boolean;
+  slug?: string;
 }
 
-export function ProgramTitle({ title, subtitle, isSoldOut }: ProgramTitleProps) {
+export function ProgramTitle({ title, subtitle, isSoldOut, slug }: ProgramTitleProps) {
   const rawId = useId();
   // Sanitize id for SVG url references (strip colons)
   const uid = rawId.replace(/:/g, "");
@@ -17,11 +18,26 @@ export function ProgramTitle({ title, subtitle, isSoldOut }: ProgramTitleProps) 
   const strokeId = `blueTitleStroke-${uid}`;
   const filterId = `titleDropShadow-${uid}`;
 
+  const isBincangTanpaBatas =
+    slug === "bincang-tanpa-batas" ||
+    title.toLowerCase().includes("bincang tanpa batas") ||
+    (Boolean(subtitle) && subtitle!.toLowerCase().includes("menghancurkan eksklusifitas"));
+
   if (isSoldOut) {
     return (
       <div className={styles.soldOutContainer}>
         <h2 className={styles.soldOutTitle}>{title}</h2>
-        {subtitle && <p className={styles.soldOutSubtitle}>{subtitle}</p>}
+        {subtitle && (
+          <p
+            className={
+              isBincangTanpaBatas
+                ? styles.soldOutSubtitleSmall
+                : styles.soldOutSubtitle
+            }
+          >
+            {subtitle}
+          </p>
+        )}
       </div>
     );
   }
@@ -117,8 +133,12 @@ export function ProgramTitle({ title, subtitle, isSoldOut }: ProgramTitleProps) 
         {subtitle && (
           <text
             x="1"
-            y="57"
-            className={styles.svgSubtitleText}
+            y={isBincangTanpaBatas ? "52" : "57"}
+            className={
+              isBincangTanpaBatas
+                ? styles.svgSubtitleTextSmall
+                : styles.svgSubtitleText
+            }
             fill={`url(#${fillId})`}
           >
             {subtitle}

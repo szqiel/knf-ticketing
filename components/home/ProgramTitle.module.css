@@ -39,6 +39,16 @@
   user-select: none;
 }
 
+.svgSubtitleTextSmall {
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-stretch: condensed;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 11.5px;
+  letter-spacing: -0.01em;
+  user-select: none;
+}
+
 /* Sold Out styling matching Figma node #113:267 */
 .soldOutContainer {
   display: flex;
@@ -71,6 +81,19 @@
   margin: 6px 0 0 0;
 }
 
+/* Dedicated smaller subtitle style for long text: Bincang Tanpa Batas */
+.soldOutSubtitleSmall {
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-stretch: condensed;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 11.5px;
+  line-height: 1.2;
+  color: #8c8c8c;
+  margin: 4px 0 0 0;
+  letter-spacing: -0.01em;
+}
+
 /* Mobile responsive adjustments */
 @media (max-width: 640px) {
   .soldOutTitle {
@@ -81,5 +104,10 @@
   .soldOutSubtitle {
     font-size: 13px;
     margin-top: 3px;
+  }
+
+  .soldOutSubtitleSmall {
+    font-size: 10px;
+    margin-top: 2px;
   }
 }

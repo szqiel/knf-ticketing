@@ -97,8 +97,8 @@ export const MOCK_PROGRAMS: Program[] = [
     id: "prog-2",
     slug: "bincang-tanpa-batas",
     posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/posters/bincang-tanpa-batas.webp",
-    title: "Talkshow",
-    subtitle: "Bincang Tanpa Batas",
+    title: "Bincang Tanpa Batas",
+    subtitle: "Menghancurkan Eksklusifitas Dalam Ekosistem Film",
     description:
       "Sesi dialog interaktif dan apresiasi perfilman bersama kurator, sutradara, dan praktisi sinema independen mengupas ekosistem film alternatif.",
     dayLabel: "Sabtu",

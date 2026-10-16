@@ -67,6 +67,7 @@ export function ProgramGrid({ programs }: ProgramGridProps) {
                       title={program.title}
                       subtitle={program.subtitle}
                       isSoldOut={true}
+                      slug={program.slug}
                     />
                   </div>
 
@@ -115,6 +116,7 @@ export function ProgramGrid({ programs }: ProgramGridProps) {
                     title={program.title}
                     subtitle={program.subtitle}
                     isSoldOut={false}
+                    slug={program.slug}
                   />
                 </div>
 
