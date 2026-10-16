@@ -8,13 +8,28 @@ export async function POST(request: Request) {
 
   try {
     const session = await issueBookingSession("qr");
-    const origin =
-      request.headers.get("origin") ||
-      request.headers.get("x-forwarded-host") ||
+    const body = (await request.json().catch(() => ({}))) as { origin?: string };
+
+    const forwardedHost = request.headers.get("x-forwarded-host");
+    const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+    const headerOrigin = request.headers.get("origin");
+
+    let candidateOrigin =
+      body?.origin ||
+      (forwardedHost ? `${forwardedProto}://${forwardedHost}` : null) ||
+      headerOrigin ||
       process.env.NEXT_PUBLIC_APP_URL ||
       "https://tomatoes-established-separated-spencer.trycloudflare.com";
 
-    const cleanOrigin = origin.startsWith("http") ? origin : `https://${origin}`;
+    // Audience phones cannot connect to localhost or 127.0.0.1!
+    // Always fallback to the public Cloudflare tunnel domain.
+    if (candidateOrigin.includes("localhost") || candidateOrigin.includes("127.0.0.1")) {
+      candidateOrigin =
+        process.env.NEXT_PUBLIC_APP_URL ||
+        "https://tomatoes-established-separated-spencer.trycloudflare.com";
+    }
+
+    const cleanOrigin = candidateOrigin.startsWith("http") ? candidateOrigin : `https://${candidateOrigin}`;
     const qrUrl = `${cleanOrigin}/?session=${session.token}`;
 
     return NextResponse.json(
