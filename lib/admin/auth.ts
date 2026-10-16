@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 export const ADMIN_COOKIE_NAME = "knf26_admin_session";
 const ADMIN_SESSION_TTL_SECONDS = 8 * 60 * 60;
@@ -55,6 +56,7 @@ export function isValidAdminSessionToken(token: string | undefined) {
 }
 
 export async function isAdminAuthenticated() {
+  await connection();
   const cookieStore = await cookies();
   return isValidAdminSessionToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value);
 }
