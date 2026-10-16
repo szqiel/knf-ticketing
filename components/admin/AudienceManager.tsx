@@ -32,8 +32,16 @@ async function readJson<T>(url: string, init?: RequestInit) {
     ...init,
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
   });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body.error ?? "Request failed");
+  const text = await response.text();
+  let body: Record<string, unknown> = {};
+  try {
+    body = JSON.parse(text);
+  } catch {
+    body = { error: `Server returned ${response.status} (${text.slice(0, 100) || response.statusText})` };
+  }
+  if (!response.ok) {
+    throw new Error(typeof body.error === "string" ? body.error : `Request failed with status ${response.status}`);
+  }
   return body as T;
 }
 

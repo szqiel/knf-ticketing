@@ -7,6 +7,32 @@ declare global {
   var __knfSql: ReturnType<typeof postgres> | undefined;
 }
 
+function normalizeDatabaseUrl(rawUrl: string): string {
+  const atIndex = rawUrl.lastIndexOf("@");
+  if (atIndex === -1) return rawUrl;
+  const userInfoStart = rawUrl.indexOf("://");
+  if (userInfoStart === -1) return rawUrl;
+
+  const prefix = rawUrl.slice(0, userInfoStart + 3);
+  const userInfo = rawUrl.slice(userInfoStart + 3, atIndex);
+  const hostAndQuery = rawUrl.slice(atIndex + 1);
+
+  const colonIndex = userInfo.indexOf(":");
+  if (colonIndex === -1) return rawUrl;
+
+  const user = userInfo.slice(0, colonIndex);
+  const rawPass = userInfo.slice(colonIndex + 1);
+
+  let cleanPass = rawPass;
+  try {
+    cleanPass = decodeURIComponent(rawPass);
+  } catch {
+    // fallback
+  }
+
+  return `${prefix}${user}:${encodeURIComponent(cleanPass)}@${hostAndQuery}`;
+}
+
 export function getSql() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required for booking operations.");
@@ -14,9 +40,10 @@ export function getSql() {
 
   if (!globalThis.__knfSql) {
     const isProd = process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
-    const isSupabasePooler = process.env.DATABASE_URL.includes("pooler.supabase.com") || process.env.DATABASE_URL.includes(":6543");
+    const connectionUrl = normalizeDatabaseUrl(process.env.DATABASE_URL);
+    const isSupabasePooler = connectionUrl.includes("pooler.supabase.com") || connectionUrl.includes(":6543");
 
-    globalThis.__knfSql = postgres(process.env.DATABASE_URL, {
+    globalThis.__knfSql = postgres(connectionUrl, {
       max: isProd ? 2 : 3,
       idle_timeout: 15,
       connect_timeout: 10,
