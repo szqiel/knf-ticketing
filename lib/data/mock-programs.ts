@@ -49,6 +49,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-1-1",
         title: "Dari Aku, Penyair Kecilmu",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/dari-aku-penyair-kecilmu.webp",
         director: "Abiyyu Farell",
         duration: "5 Menit",
         durationMin: 5,
@@ -59,6 +60,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-1-2",
         title: "The Qwerty Book",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/the-qwerty-book.webp",
         director: "Wahyuda Rahman",
         duration: "20 Menit",
         durationMin: 20,
@@ -69,6 +71,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-1-3",
         title: "Selaras",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/selaras.webp",
         director: "Alya Azalia Dida Saphira",
         duration: "30 Menit",
         durationMin: 30,
@@ -79,6 +82,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-1-4",
         title: "NARA",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/nara.webp",
         director: "Mahesa Danu Wicaksono",
         duration: "20 Menit",
         durationMin: 20,
@@ -108,6 +112,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-2-1",
         title: "Perfected Grammar",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/perfected-grammar.webp",
         director: "Andrea Suwito",
         duration: "11 Menit",
         durationMin: 11,
@@ -137,6 +142,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-3-1",
         title: "Lah Piye Maneh",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/lah-piye-maneh.webp",
         director: "Novrita Farihah",
         duration: "15 Menit",
         durationMin: 15,
@@ -147,6 +153,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-3-2",
         title: "Syukur",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/syukur.webp",
         director: "Happy Wahyu / Kronik Filmedia",
         duration: "15 Menit",
         durationMin: 15,
@@ -157,6 +164,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-3-3",
         title: "Cublak Cublak Suweng",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/cublak-cublak-suweng.webp",
         director: "Kronik Filmedia",
         duration: "15 Menit",
         durationMin: 15,
@@ -167,6 +175,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-3-4",
         title: "Glimmer",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/glimmer.webp",
         director: "Kronik Filmedia",
         duration: "15 Menit",
         durationMin: 15,
@@ -196,6 +205,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-4-1",
         title: "OTW",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/otw.webp",
         director: "Fransiska Thalia Sadikin",
         duration: "10 Menit",
         durationMin: 10,
@@ -206,6 +216,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-4-2",
         title: "Hegemoni Kejantanan",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/hegemoni-kejantanan.webp",
         director: "Rafif Bahanan",
         duration: "15 Menit",
         durationMin: 15,
@@ -216,6 +227,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-4-3",
         title: "Tut Wuri Handayani",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/tut-wuri-handayani.webp",
         director: "Abill Ar Rafiq",
         duration: "15 Menit",
         durationMin: 15,
@@ -226,6 +238,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-4-4",
         title: "Sometimes Nina so Confusing",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/sometimes-nina-so-confusing.webp",
         director: "Reyhan Maulana Yanuardi",
         duration: "25 Menit",
         durationMin: 25,
@@ -255,6 +268,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-5-1",
         title: "Tumbuhlah!",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/tumbuhlah.webp",
         director: "Daviraja Tajibarani",
         duration: "15 Menit",
         durationMin: 15,
@@ -265,6 +279,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-5-2",
         title: "Time Brings Roses, and Its Thorns",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/time-brings-roses-and-its-thorns.webp",
         director: "Clauren Christiawan",
         duration: "23 Menit",
         durationMin: 23,
@@ -275,6 +290,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-5-3",
         title: "Jenaka",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/jenaka.webp",
         director: "Alfian Yudha Pratama",
         duration: "14 Menit",
         durationMin: 14,
@@ -285,6 +301,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-5-4",
         title: "Hari ini, untuk Bapak",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/hari-ini-untuk-bapak.webp",
         director: "Lourdes Arzetta Mumpuni P. M.",
         duration: "18 Menit",
         durationMin: 18,
@@ -314,6 +331,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-6-1",
         title: "Selamat Makan!",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/selamat-makan.webp",
         director: "Andra Erwinendya",
         duration: "15 Menit",
         durationMin: 15,
@@ -324,6 +342,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-6-2",
         title: "Aku Tahu Bapak",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/aku-tahu-bapak.webp",
         director: "Ardhian Virgi",
         duration: "16 Menit",
         durationMin: 16,
@@ -334,6 +353,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-6-3",
         title: "Nyanyian di Angkringan",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/nyanyian-di-angkringan.webp",
         director: "Shafiyyah Aida",
         duration: "6 Menit",
         durationMin: 6,
@@ -344,6 +364,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-6-4",
         title: "Kodok Ning Jero Batok",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/kodok-ning-jero-batok.webp",
         director: "Ali Yafie Muzaki",
         duration: "13 Menit",
         durationMin: 13,
@@ -354,6 +375,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-6-5",
         title: "38-The Last Swing",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/38-the-last-swing.webp",
         director: "Fajar Boby Saputra",
         duration: "15 Menit",
         durationMin: 15,
@@ -383,6 +405,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-7-1",
         title: "Malady",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/malady.webp",
         director: "Naufal Mahawira",
         duration: "17 Menit",
         durationMin: 17,
@@ -393,6 +416,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-7-2",
         title: "Limbung",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/limbung.webp",
         director: "Putri Salsabila",
         duration: "28 Menit",
         durationMin: 28,
@@ -403,6 +427,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-7-3",
         title: "We're All Indigo in This Country",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/were-all-indigo-in-this-country.webp",
         director: "Aliyya Faiturrohmah",
         duration: "15 Menit",
         durationMin: 15,
@@ -413,6 +438,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-7-4",
         title: "Kagol",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/kagol.webp",
         director: "Rais Akbar",
         duration: "20 Menit",
         durationMin: 20,
@@ -442,6 +468,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-8-1",
         title: "Lamun Omongan",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/lamun-omongan.webp",
         director: "Moh Bayu Saputra",
         duration: "8 Menit",
         durationMin: 8,
@@ -452,6 +479,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-8-2",
         title: "Cacing Biru",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/cacing-biru.webp",
         director: "Farhan Kurniawan",
         duration: "18 Menit",
         durationMin: 18,
@@ -462,6 +490,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-8-3",
         title: "A Flower is Not a Flower",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/a-flower-is-not-a-flower.webp",
         director: "Farhan Kurniawan",
         duration: "17 Menit",
         durationMin: 17,
@@ -472,6 +501,7 @@ export const MOCK_PROGRAMS: Program[] = [
       {
         id: "film-8-4",
         title: "Asmarandana",
+        posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/films/asmarandana.webp",
         director: "Ivan Valentinus",
         duration: "12 Menit",
         durationMin: 12,
