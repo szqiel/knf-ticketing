@@ -44,13 +44,16 @@ export function ReportsManager() {
   const loadData = useCallback(async () => {
     try {
       const [progData, audData] = await Promise.all([
-        readJson<{ programs: Program[] }>("/api/admin/programs"),
-        readJson<{ rows: AudienceRow[] }>("/api/admin/audience"),
+        readJson<{ programs?: Program[] }>("/api/admin/programs"),
+        readJson<{ rows?: AudienceRow[]; audience?: AudienceRow[] }>("/api/admin/audience"),
       ]);
-      setPrograms(progData.programs);
-      setAudience(audData.rows);
+      setPrograms(Array.isArray(progData?.programs) ? progData.programs : []);
+      const audRows = audData?.rows ?? audData?.audience ?? [];
+      setAudience(Array.isArray(audRows) ? audRows : []);
     } catch (e) {
       console.error(e);
+      setPrograms([]);
+      setAudience([]);
     } finally {
       setLoading(false);
     }
@@ -69,13 +72,15 @@ export function ReportsManager() {
     window.open(`/api/admin/reports/export?${params.toString()}`, "_blank");
   };
 
-  const totalBookings = audience.length;
-  const validBookings = audience.filter((a) => a.status === "booked").length;
-  const cancelledBookings = audience.filter((a) => a.status === "cancelled").length;
+  const safeAudience = Array.isArray(audience) ? audience : [];
+  const safePrograms = Array.isArray(programs) ? programs : [];
+  const totalBookings = safeAudience.length;
+  const validBookings = safeAudience.filter((a) => a.status === "booked").length;
+  const cancelledBookings = safeAudience.filter((a) => a.status === "cancelled").length;
 
   // Breakdown per program
-  const programBreakdown = programs.map((p) => {
-    const progsBookings = audience.filter((a) => a.programId === p.id);
+  const programBreakdown = safePrograms.map((p) => {
+    const progsBookings = safeAudience.filter((a) => a.programId === p.id);
     const valid = progsBookings.filter((a) => a.status === "booked").length;
     const cancelled = progsBookings.filter((a) => a.status === "cancelled").length;
     // Capacity: 506 physical seats in cinema hall

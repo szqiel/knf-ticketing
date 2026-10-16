@@ -57,13 +57,15 @@ export function ProgramsManager() {
 
   const loadPrograms = useCallback(async () => {
     try {
-      const data = await readJson<{ programs: Program[] }>("/api/admin/programs");
-      setPrograms(data.programs);
-      if (!selectedProgramId && data.programs.length > 0) {
-        setSelectedProgramId(data.programs[0].id);
+      const data = await readJson<{ programs?: Program[] }>("/api/admin/programs");
+      const list = Array.isArray(data?.programs) ? data.programs : [];
+      setPrograms(list);
+      if (!selectedProgramId && list.length > 0) {
+        setSelectedProgramId(list[0].id);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load programs");
+      setPrograms([]);
     } finally {
       setLoading(false);
     }
@@ -72,10 +74,11 @@ export function ProgramsManager() {
   const loadFilms = useCallback(async (progId: string) => {
     if (!progId) return;
     try {
-      const data = await readJson<{ films: Film[] }>(`/api/admin/programs/${progId}/films`);
-      setFilms(data.films);
+      const data = await readJson<{ films?: Film[] }>(`/api/admin/programs/${progId}/films`);
+      setFilms(Array.isArray(data?.films) ? data.films : []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load films");
+      setFilms([]);
     }
   }, []);
 

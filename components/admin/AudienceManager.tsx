@@ -52,18 +52,22 @@ export function AudienceManager() {
 
   const loadData = useCallback(async () => {
     try {
-      const progData = await readJson<{ programs: Program[] }>("/api/admin/programs");
-      setPrograms(progData.programs);
+      const progData = await readJson<{ programs?: Program[] }>("/api/admin/programs");
+      setPrograms(Array.isArray(progData?.programs) ? progData.programs : []);
 
       const query = new URLSearchParams();
       if (selectedProgramId && selectedProgramId !== "all") query.set("programId", selectedProgramId);
       if (fromDate) query.set("from", fromDate);
       if (toDate) query.set("to", toDate);
 
-      const audienceData = await readJson<{ rows: AudienceRow[] }>(`/api/admin/audience?${query.toString()}`);
-      setAudience(audienceData.rows);
+      const audienceData = await readJson<{ rows?: AudienceRow[]; audience?: AudienceRow[] }>(
+        `/api/admin/audience?${query.toString()}`,
+      );
+      const rows = audienceData?.rows ?? audienceData?.audience ?? [];
+      setAudience(Array.isArray(rows) ? rows : []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load audience data");
+      setAudience([]);
     } finally {
       setLoading(false);
     }
@@ -75,14 +79,15 @@ export function AudienceManager() {
 
   // Client-side instant fuzzy search across name, contact/IG, and seat label
   const filteredAudience = useMemo(() => {
-    if (!searchQuery.trim()) return audience;
+    const list = Array.isArray(audience) ? audience : [];
+    if (!searchQuery.trim()) return list;
     const q = searchQuery.toLowerCase().trim();
-    return audience.filter(
+    return list.filter(
       (row) =>
-        row.fullName.toLowerCase().includes(q) ||
-        row.contact.toLowerCase().includes(q) ||
-        (row.seatLabel && row.seatLabel.toLowerCase().includes(q)) ||
-        row.programTitle.toLowerCase().includes(q),
+        (row.fullName || "").toLowerCase().includes(q) ||
+        (row.contact || "").toLowerCase().includes(q) ||
+        (row.seatLabel || "").toLowerCase().includes(q) ||
+        (row.programTitle || "").toLowerCase().includes(q),
     );
   }, [audience, searchQuery]);
 
@@ -179,8 +184,8 @@ export function AudienceManager() {
               value={selectedProgramId}
               onChange={(e) => setSelectedProgramId(e.target.value)}
             >
-              <option value="all">⚡ All Programs ({audience.length} bookings)</option>
-              {programs.map((p) => (
+              <option value="all">⚡ All Programs ({audience?.length ?? 0} bookings)</option>
+              {(programs ?? []).map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.title}
                 </option>
