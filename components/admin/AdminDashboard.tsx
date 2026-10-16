@@ -92,18 +92,44 @@ export default function AdminDashboard() {
     if (programId) void loadSeatMap(programId);
   }, [programId, loadSeatMap]);
 
-  // Real-time SSE stream
+  // Real-time SSE stream & fallback sync
   useEffect(() => {
     if (!programId) return;
-    const source = new EventSource(`/api/programs/${programId}/stream`);
+    let source: EventSource | null = null;
     const refresh = () => {
       void loadSeatMap(programId);
       void readJson<FestivalKpis>("/api/admin/kpis").then(setKpis).catch(() => {});
     };
-    source.addEventListener("seats_changed", refresh);
+
+    try {
+      source = new EventSource(`/api/programs/${programId}/stream`);
+      source.addEventListener("seats_changed", refresh);
+      source.onerror = () => {
+        // SSE disconnected or unsupported on pooler; fallback polling guarantees fresh data
+      };
+    } catch {
+      // EventSource not supported
+    }
+
+    // Polling fallback every 4s while admin is looking at the dashboard
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        refresh();
+      }
+    }, 4000);
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     return () => {
-      source.removeEventListener("seats_changed", refresh);
-      source.close();
+      if (source) {
+        source.removeEventListener("seats_changed", refresh);
+        source.close();
+      }
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [programId, loadSeatMap]);
 

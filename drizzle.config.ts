@@ -5,7 +5,7 @@ export default defineConfig({
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? "postgres://localhost/knf_ticketing",
+    url: process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? "postgres://localhost/knf_ticketing",
   },
   strict: true,
   verbose: true,

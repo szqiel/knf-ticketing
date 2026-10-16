@@ -65,23 +65,50 @@ export function useSeatMapData({ programSlug, initialSeats }: UseSeatMapDataOpti
   useEffect(() => {
     if (!programId) return;
 
-    const eventSource = new EventSource(`/api/programs/${programId}/stream`);
+    let eventSource: EventSource | null = null;
     let refreshTimer: number | undefined;
 
     const scheduleRefresh = () => {
       if (refreshTimer !== undefined) return;
-
       refreshTimer = window.setTimeout(() => {
         refreshTimer = undefined;
         void loadSeatMap();
       }, 80);
     };
 
-    eventSource.addEventListener("seats_changed", scheduleRefresh);
+    // Try EventSource
+    try {
+      eventSource = new EventSource(`/api/programs/${programId}/stream`);
+      eventSource.addEventListener("seats_changed", scheduleRefresh);
+      eventSource.onerror = () => {
+        // SSE disconnected or unsupported on pooler; fallback polling guarantees fresh data
+      };
+    } catch {
+      // EventSource not supported
+    }
+
+    // Resilient fallback polling: keeps seat holds & bookings in sync every 3.5s
+    const pollInterval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void loadSeatMap();
+      }
+    }, 3500);
+
+    // Refresh immediately when returning to tab or unlocking mobile screen
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void loadSeatMap();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      eventSource.removeEventListener("seats_changed", scheduleRefresh);
-      eventSource.close();
+      if (eventSource) {
+        eventSource.removeEventListener("seats_changed", scheduleRefresh);
+        eventSource.close();
+      }
+      window.clearInterval(pollInterval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (refreshTimer !== undefined) window.clearTimeout(refreshTimer);
     };
   }, [loadSeatMap, programId]);

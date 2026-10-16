@@ -13,10 +13,15 @@ export function getSql() {
   }
 
   if (!globalThis.__knfSql) {
+    const isProd = process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
+    const isSupabasePooler = process.env.DATABASE_URL.includes("pooler.supabase.com") || process.env.DATABASE_URL.includes(":6543");
+
     globalThis.__knfSql = postgres(process.env.DATABASE_URL, {
-      max: process.env.NODE_ENV === "production" ? 10 : 3,
-      idle_timeout: 20,
+      max: isProd ? 2 : 3,
+      idle_timeout: 15,
       connect_timeout: 10,
+      prepare: !isSupabasePooler && !isProd ? true : false,
+      ssl: isProd || isSupabasePooler ? "require" : undefined,
     });
   }
 
