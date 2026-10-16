@@ -6,14 +6,46 @@ import { isCinemaFrontUnavailable } from "../lib/booking/seat-layout";
 import { CANONICAL_SEATS } from "../lib/booking/canonical-seats";
 import { blockedSeats, films, programs, seats } from "../lib/db/schema";
 
+function normalizeDatabaseUrl(rawUrl: string): string {
+  const atIndex = rawUrl.lastIndexOf("@");
+  if (atIndex === -1) return rawUrl;
+  const userInfoStart = rawUrl.indexOf("://");
+  if (userInfoStart === -1) return rawUrl;
+
+  const prefix = rawUrl.slice(0, userInfoStart + 3);
+  const userInfo = rawUrl.slice(userInfoStart + 3, atIndex);
+  const hostAndQuery = rawUrl.slice(atIndex + 1);
+
+  const colonIndex = userInfo.indexOf(":");
+  if (colonIndex === -1) return rawUrl;
+
+  const user = userInfo.slice(0, colonIndex);
+  const rawPass = userInfo.slice(colonIndex + 1);
+
+  let cleanPass = rawPass;
+  try {
+    cleanPass = decodeURIComponent(rawPass);
+  } catch {
+    // fallback
+  }
+
+  return `${prefix}${user}:${encodeURIComponent(cleanPass)}@${hostAndQuery}`;
+}
+
 async function seed() {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is required to seed KNF26.");
   }
 
+  const cleanUrl = normalizeDatabaseUrl(databaseUrl);
+  const isSupabasePooler = cleanUrl.includes("pooler.supabase.com") || cleanUrl.includes(":6543");
   const seedBookingOpen = process.env.SEED_BOOKING_OPEN !== "false";
-  const queryClient = postgres(databaseUrl, { max: 1 });
+  const queryClient = postgres(cleanUrl, {
+    max: 1,
+    prepare: !isSupabasePooler,
+    ssl: isSupabasePooler ? "require" : undefined,
+  });
   const db = drizzle(queryClient);
 
   const programRows = MOCK_PROGRAMS.map((program, index) => ({
