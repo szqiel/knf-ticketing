@@ -23,6 +23,7 @@ export interface Program {
   timeSlot: string;
   seatsLeft: number;
   isSoldOut: boolean;
+  bookingOpen?: boolean;
   posterUrl?: string;
   totalFilmsCount?: number;
   films?: Film[];

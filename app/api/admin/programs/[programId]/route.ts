@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { BookingError, bookingErrorStatus } from "@/lib/booking/errors";
 import { updateProgram, getAdminPrograms } from "@/lib/admin/service";
 import { requireAdmin } from "@/lib/admin/require-admin";
@@ -42,6 +43,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ pr
 
   try {
     const updated = await updateProgram(programId, body);
+    revalidatePath("/");
+    revalidatePath(`/p/${updated.slug}`);
     return NextResponse.json({ program: updated });
   } catch (error) {
     if (error instanceof BookingError) {

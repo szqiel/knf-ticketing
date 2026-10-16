@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 import styles from "./home.module.css";
 import { getProgramsWithLiveAvailability } from "@/lib/booking/service";
-import { ProgramTitle } from "@/components/home/ProgramTitle";
+import { ProgramGrid } from "@/components/home/ProgramGrid";
+
 export const instant = false;
 
 export default async function HomePage() {
@@ -38,73 +38,7 @@ export default async function HomePage() {
           </section>
 
           {/* 2-Column Program Cards Grid */}
-          <section
-            className={styles.gridContainer}
-            aria-label="Festival Programs Lineup"
-          >
-            {programsList.map((program) => (
-              <Link
-                key={program.id}
-                href={`/p/${program.slug}`}
-                className={`${styles.programCard} ${
-                  program.isSoldOut ? styles.cardSoldOut : styles.cardActive
-                }`}
-              >
-                {/* Left: Poster Box */}
-                <div className={styles.posterBox}>
-                  {program.posterUrl ? (
-                    <Image
-                      src={program.posterUrl}
-                      alt={program.title}
-                      fill
-                      sizes="(max-width: 640px) 140px, 200px"
-                      style={{ objectFit: "cover" }}
-                    />
-                  ) : (
-                    <>
-                      <div className={styles.crossLine1} />
-                      <div className={styles.crossLine2} />
-                      <div className={styles.posterBadge}>PROGRAM POSTER</div>
-                    </>
-                  )}
-                </div>
-
-                {/* Right: Content Area */}
-                <div className={styles.contentBox}>
-                  <div className={styles.titleArea}>
-                    <ProgramTitle
-                      title={program.title}
-                      subtitle={program.subtitle}
-                      isSoldOut={program.isSoldOut}
-                    />
-                  </div>
-
-                  <div
-                    className={
-                      program.isSoldOut
-                        ? styles.timePillSoldOut
-                        : styles.timePillActive
-                    }
-                  >
-                    <span className={styles.dayLabel}>{program.dayLabel}</span>
-                    <span className={styles.timeLabel}>{program.timeSlot}</span>
-                  </div>
-
-                  <div
-                    className={
-                      program.isSoldOut
-                        ? styles.badgeSoldOut
-                        : styles.badgeActive
-                    }
-                  >
-                    {program.isSoldOut
-                      ? "SOLD OUT"
-                      : `${program.seatsLeft} SEATS LEFT`}
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </section>
+          <ProgramGrid programs={programsList} />
         </div>
       </div>
     </main>

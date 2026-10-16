@@ -573,6 +573,8 @@ export async function getProgramsWithLiveAvailability(): Promise<Program[]> {
       // Front bookable: 201 seats. If 150 occupied, rear 256 seats unlock (total 457).
       const totalBookable = reserved >= REAR_ROW_UNLOCK_THRESHOLD ? 457 : 201;
       const available = Math.max(0, totalBookable - reserved);
+      const isBookingOpen = Boolean(p.bookingOpen);
+      const isSoldOut = !isBookingOpen || available <= 0;
 
       // Map real films from Supabase, with fallback to mockProg
       const pFilms = filmsByProgram.get(p.id);
@@ -602,7 +604,8 @@ export async function getProgramsWithLiveAvailability(): Promise<Program[]> {
         endsAt: p.endsAt ? String(p.endsAt) : mockProg?.endsAt,
         timeSlot: mockProg?.timeSlot ?? (p.startsAt && p.endsAt ? `${p.startsAt.slice(0, 5)} — ${p.endsAt.slice(0, 5)}` : "10:00 — 12:00"),
         seatsLeft: available,
-        isSoldOut: available <= 0,
+        isSoldOut,
+        bookingOpen: isBookingOpen,
         posterUrl: p.posterPath ?? mockProg?.posterUrl,
         totalFilmsCount: mappedFilms.length,
         films: mappedFilms,
