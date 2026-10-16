@@ -44,10 +44,10 @@ export function getSql() {
     const isSupabasePooler = connectionUrl.includes("pooler.supabase.com") || connectionUrl.includes(":6543");
 
     globalThis.__knfSql = postgres(connectionUrl, {
-      max: isProd ? 2 : 3,
+      max: 5,
       idle_timeout: 15,
       connect_timeout: 10,
-      prepare: !isSupabasePooler && !isProd ? true : false,
+      prepare: false,
       ssl: isProd || isSupabasePooler ? "require" : undefined,
     });
   }

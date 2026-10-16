@@ -10,6 +10,7 @@ interface ProgramPageProps {
 
 export const instant = false;
 
+
 export async function generateStaticParams() {
   return MOCK_PROGRAMS.map((program) => ({
     slug: program.slug,

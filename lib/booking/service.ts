@@ -5,13 +5,14 @@ import { getDb, getSql } from "@/lib/db/client";
 import {
   blockedSeats,
   bookings,
+  films,
   programs,
   reservations,
   seats,
 } from "@/lib/db/schema";
 import { BookingError } from "./errors";
 import { assertBookingSession } from "./sessions";
-import { MOCK_PROGRAMS, type Program } from "@/lib/data/mock-programs";
+import { MOCK_PROGRAMS, type Film, type Program } from "@/lib/data/mock-programs";
 import {
   isCinemaFrontUnavailable,
   isFrontCinemaRow,
@@ -520,61 +521,93 @@ export async function getProgramsWithLiveAvailability(): Promise<Program[]> {
   try {
     if (!process.env.DATABASE_URL) return MOCK_PROGRAMS;
     const db = getDb();
-    const dbPrograms = await db
-      .select()
-      .from(programs)
-      .where(eq(programs.isPublished, true))
-      .orderBy(programs.sortOrder);
+    const sql = getSql();
+
+    // Fetch published programs, live seat statistics, and films concurrently in one fast batch
+    const [dbPrograms, stats, filmRows] = await Promise.all([
+      db
+        .select()
+        .from(programs)
+        .where(eq(programs.isPublished, true))
+        .orderBy(programs.sortOrder),
+      sql<{ program_id: string; blocked_count: number; reserved_count: number }[]>`
+        SELECT 
+          p.id as program_id,
+          COALESCE(b.blocked_count, 0)::int as blocked_count,
+          COALESCE(r.active_count, 0)::int as reserved_count
+        FROM program p
+        LEFT JOIN (
+          SELECT program_id, COUNT(*) as blocked_count 
+          FROM blocked_seat 
+          GROUP BY program_id
+        ) b ON b.program_id = p.id
+        LEFT JOIN (
+          SELECT program_id, COUNT(*) as active_count 
+          FROM reservation 
+          WHERE status IN ('held', 'booked') 
+          GROUP BY program_id
+        ) r ON r.program_id = p.id
+      `,
+      db
+        .select()
+        .from(films)
+        .orderBy(films.sortOrder),
+    ]);
 
     if (!dbPrograms.length) return MOCK_PROGRAMS;
 
-    const results = await Promise.all(
-      dbPrograms.map(async (p) => {
-        try {
-          const seatMap = await getSeatMap(p.id);
-          const available = seatMap.seats.filter((s) => s.status === "available").length;
-          const mockProg = MOCK_PROGRAMS.find((m) => m.slug === p.slug);
+    const statsMap = new Map(stats.map((s) => [s.program_id, s]));
+    const filmsByProgram = new Map<string, typeof filmRows>();
+    for (const f of filmRows) {
+      const list = filmsByProgram.get(f.programId) ?? [];
+      list.push(f);
+      filmsByProgram.set(f.programId, list);
+    }
 
-          return {
-            id: p.id,
-            slug: p.slug,
-            title: p.title,
-            subtitle: p.subtitle ?? mockProg?.subtitle,
-            description: p.description ?? mockProg?.description,
-            dayLabel: p.dayLabel ?? mockProg?.dayLabel ?? "Sabtu",
-            showDate: p.showDate ? String(p.showDate) : mockProg?.showDate,
-            startsAt: p.startsAt ? String(p.startsAt) : mockProg?.startsAt,
-            endsAt: p.endsAt ? String(p.endsAt) : mockProg?.endsAt,
-            timeSlot: mockProg?.timeSlot ?? (p.startsAt && p.endsAt ? `${p.startsAt.slice(0, 5)} — ${p.endsAt.slice(0, 5)}` : "10:00 — 12:00"),
-            seatsLeft: available,
-            isSoldOut: available <= 0,
-            posterUrl: p.posterPath ?? mockProg?.posterUrl,
-            totalFilmsCount: mockProg?.totalFilmsCount ?? mockProg?.films?.length ?? 0,
-            films: mockProg?.films ?? [],
-          } satisfies Program;
-        } catch (e) {
-          console.error(`Error calculating availability for program ${p.slug}:`, e);
-          const mock = MOCK_PROGRAMS.find((m) => m.slug === p.slug);
-          return (
-            mock ?? {
-              id: p.id,
-              slug: p.slug,
-              title: p.title,
-              subtitle: p.subtitle ?? undefined,
-              description: p.description ?? undefined,
-              dayLabel: p.dayLabel ?? "Sabtu",
-              timeSlot: "10:00 — 12:00",
-              seatsLeft: 201,
-              isSoldOut: false,
-              totalFilmsCount: 0,
-              films: [],
-            }
-          );
-        }
-      }),
-    );
+    return dbPrograms.map((p) => {
+      const mockProg = MOCK_PROGRAMS.find((m) => m.slug === p.slug);
+      const stat = statsMap.get(p.id);
+      const reserved = stat?.reserved_count ?? 0;
+      
+      // Calculate available seats according to progressive cinema tiering:
+      // Front bookable: 201 seats. If 150 occupied, rear 256 seats unlock (total 457).
+      const totalBookable = reserved >= REAR_ROW_UNLOCK_THRESHOLD ? 457 : 201;
+      const available = Math.max(0, totalBookable - reserved);
 
-    return results;
+      // Map real films from Supabase, with fallback to mockProg
+      const pFilms = filmsByProgram.get(p.id);
+      const mappedFilms: Film[] = pFilms && pFilms.length > 0
+        ? pFilms.map((f) => ({
+            id: f.id,
+            title: f.title,
+            director: f.director ?? "",
+            duration: f.durationMin ? `${f.durationMin} Menit` : "",
+            durationMin: f.durationMin ?? undefined,
+            origin: f.origin ?? "",
+            synopsis: f.synopsis ?? "",
+            posterUrl: f.posterPath ?? undefined,
+            stillUrl: f.stillPath ?? undefined,
+          }))
+        : mockProg?.films ?? [];
+
+      return {
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        subtitle: p.subtitle ?? mockProg?.subtitle,
+        description: p.description ?? mockProg?.description,
+        dayLabel: p.dayLabel ?? mockProg?.dayLabel ?? "Sabtu",
+        showDate: p.showDate ? String(p.showDate) : mockProg?.showDate,
+        startsAt: p.startsAt ? String(p.startsAt) : mockProg?.startsAt,
+        endsAt: p.endsAt ? String(p.endsAt) : mockProg?.endsAt,
+        timeSlot: mockProg?.timeSlot ?? (p.startsAt && p.endsAt ? `${p.startsAt.slice(0, 5)} — ${p.endsAt.slice(0, 5)}` : "10:00 — 12:00"),
+        seatsLeft: available,
+        isSoldOut: available <= 0,
+        posterUrl: p.posterPath ?? mockProg?.posterUrl,
+        totalFilmsCount: mappedFilms.length,
+        films: mappedFilms,
+      } satisfies Program;
+    });
   } catch (error) {
     console.error("Failed to query live programs from DB, falling back to mock:", error);
     return MOCK_PROGRAMS;

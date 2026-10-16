@@ -3,7 +3,6 @@ import Link from "next/link";
 import styles from "./home.module.css";
 import { getProgramsWithLiveAvailability } from "@/lib/booking/service";
 import { ProgramTitle } from "@/components/home/ProgramTitle";
-
 export const instant = false;
 
 export default async function HomePage() {
