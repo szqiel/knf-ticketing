@@ -8,6 +8,7 @@ import { SeatLegend } from "@/components/booking/SeatMap";
 import { ProgramTitle } from "@/components/home/ProgramTitle";
 import { createDemoSeats } from "@/lib/booking/mock-seats";
 import { MOCK_PROGRAMS } from "@/lib/data/mock-programs";
+import { getProgramWithLiveAvailability } from "@/lib/booking/service";
 import styles from "./seats-page.module.css";
 
 export function generateStaticParams() {
@@ -30,7 +31,7 @@ export default function SeatMapPage({ params, searchParams }: SeatMapPageProps) 
 async function SeatMapContent({ params, searchParams }: SeatMapPageProps) {
   const { slug } = await params;
   const resolvedSearchParams = await searchParams;
-  const program = MOCK_PROGRAMS.find((item) => item.slug === slug);
+  const program = (await getProgramWithLiveAvailability(slug)) ?? MOCK_PROGRAMS.find((item) => item.slug === slug);
 
   if (!program) notFound();
 

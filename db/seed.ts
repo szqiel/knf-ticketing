@@ -1,5 +1,6 @@
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
+import { sql } from "drizzle-orm";
 import { MOCK_PROGRAMS } from "../lib/data/mock-programs";
 import { isCinemaFrontUnavailable } from "../lib/booking/seat-layout";
 import { CANONICAL_SEATS } from "../lib/booking/canonical-seats";
@@ -11,9 +12,9 @@ async function seed() {
     throw new Error("DATABASE_URL is required to seed KNF26.");
   }
 
-  const seedBookingOpen = process.env.SEED_BOOKING_OPEN === "true";
-  const sql = postgres(databaseUrl, { max: 1 });
-  const db = drizzle(sql);
+  const seedBookingOpen = process.env.SEED_BOOKING_OPEN !== "false";
+  const queryClient = postgres(databaseUrl, { max: 1 });
+  const db = drizzle(queryClient);
 
   const programRows = MOCK_PROGRAMS.map((program, index) => ({
     slug: program.slug,
@@ -44,7 +45,15 @@ async function seed() {
     await db
       .insert(programs)
       .values(programRows)
-      .onConflictDoNothing({ target: programs.slug });
+      .onConflictDoUpdate({
+        target: programs.slug,
+        set: {
+          title: sql`excluded.title`,
+          subtitle: sql`excluded.subtitle`,
+          description: sql`excluded.description`,
+          bookingOpen: sql`excluded.booking_open`,
+        },
+      });
 
     const existingPrograms = await db
       .select({ id: programs.id, slug: programs.slug })
@@ -90,7 +99,7 @@ async function seed() {
       `Seeded ${existingPrograms.length} programs, ${filmRows.length} films, ${seatRows.length} seats, and ${blockedSeatRows.length} blocked-seat mappings.`,
     );
   } finally {
-    await sql.end();
+    await queryClient.end();
   }
 }
 

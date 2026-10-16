@@ -11,6 +11,7 @@ import {
 } from "@/lib/db/schema";
 import { BookingError } from "./errors";
 import { assertBookingSession } from "./sessions";
+import { MOCK_PROGRAMS, type Program } from "@/lib/data/mock-programs";
 import {
   isCinemaFrontUnavailable,
   isFrontCinemaRow,
@@ -509,3 +510,79 @@ export async function cancelBooking(
   if (result.cancelled) await notifySeatChange(programId);
   return result;
 }
+
+/**
+ * Retrieves all programs with real-time seat availability calculated directly
+ * from PostgreSQL (accounting for reserved seats, holds, bookings, and progressive rear tier).
+ * Falls back safely to MOCK_PROGRAMS if DB is unreachable.
+ */
+export async function getProgramsWithLiveAvailability(): Promise<Program[]> {
+  try {
+    if (!process.env.DATABASE_URL) return MOCK_PROGRAMS;
+    const db = getDb();
+    const dbPrograms = await db
+      .select()
+      .from(programs)
+      .where(eq(programs.isPublished, true))
+      .orderBy(programs.sortOrder);
+
+    if (!dbPrograms.length) return MOCK_PROGRAMS;
+
+    const results = await Promise.all(
+      dbPrograms.map(async (p) => {
+        try {
+          const seatMap = await getSeatMap(p.id);
+          const available = seatMap.seats.filter((s) => s.status === "available").length;
+          const mockProg = MOCK_PROGRAMS.find((m) => m.slug === p.slug);
+
+          return {
+            id: p.id,
+            slug: p.slug,
+            title: p.title,
+            subtitle: p.subtitle ?? mockProg?.subtitle,
+            description: p.description ?? mockProg?.description,
+            dayLabel: p.dayLabel ?? mockProg?.dayLabel ?? "Sabtu",
+            showDate: p.showDate ? String(p.showDate) : mockProg?.showDate,
+            startsAt: p.startsAt ? String(p.startsAt) : mockProg?.startsAt,
+            endsAt: p.endsAt ? String(p.endsAt) : mockProg?.endsAt,
+            timeSlot: mockProg?.timeSlot ?? (p.startsAt && p.endsAt ? `${p.startsAt.slice(0, 5)} — ${p.endsAt.slice(0, 5)}` : "10:00 — 12:00"),
+            seatsLeft: available,
+            isSoldOut: available <= 0,
+            posterUrl: p.posterPath ?? mockProg?.posterUrl,
+            totalFilmsCount: mockProg?.totalFilmsCount ?? mockProg?.films?.length ?? 0,
+            films: mockProg?.films ?? [],
+          } satisfies Program;
+        } catch (e) {
+          console.error(`Error calculating availability for program ${p.slug}:`, e);
+          const mock = MOCK_PROGRAMS.find((m) => m.slug === p.slug);
+          return (
+            mock ?? {
+              id: p.id,
+              slug: p.slug,
+              title: p.title,
+              subtitle: p.subtitle ?? undefined,
+              description: p.description ?? undefined,
+              dayLabel: p.dayLabel ?? "Sabtu",
+              timeSlot: "10:00 — 12:00",
+              seatsLeft: 201,
+              isSoldOut: false,
+              totalFilmsCount: 0,
+              films: [],
+            }
+          );
+        }
+      }),
+    );
+
+    return results;
+  } catch (error) {
+    console.error("Failed to query live programs from DB, falling back to mock:", error);
+    return MOCK_PROGRAMS;
+  }
+}
+
+export async function getProgramWithLiveAvailability(slug: string): Promise<Program | undefined> {
+  const all = await getProgramsWithLiveAvailability();
+  return all.find((p) => p.slug === slug);
+}
+

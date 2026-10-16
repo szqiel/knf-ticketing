@@ -1,10 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./home.module.css";
-import { MOCK_PROGRAMS } from "@/lib/data/mock-programs";
+import { getProgramsWithLiveAvailability } from "@/lib/booking/service";
 import { ProgramTitle } from "@/components/home/ProgramTitle";
 
-export default function HomePage() {
+export const instant = false;
+
+export default async function HomePage() {
+  const programsList = await getProgramsWithLiveAvailability();
+
   return (
     <main className={styles.pageWrapper}>
       <div className={styles.overlay}>
@@ -39,7 +43,7 @@ export default function HomePage() {
             className={styles.gridContainer}
             aria-label="Festival Programs Lineup"
           >
-            {MOCK_PROGRAMS.map((program) => (
+            {programsList.map((program) => (
               <Link
                 key={program.id}
                 href={`/p/${program.slug}`}

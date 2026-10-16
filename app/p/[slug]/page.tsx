@@ -2,10 +2,13 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { MOCK_PROGRAMS } from "@/lib/data/mock-programs";
 import { ProgramDetailView } from "@/components/program/ProgramDetailView";
+import { getProgramWithLiveAvailability } from "@/lib/booking/service";
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
 }
+
+export const instant = false;
 
 export async function generateStaticParams() {
   return MOCK_PROGRAMS.map((program) => ({
@@ -35,7 +38,7 @@ export async function generateMetadata({
 
 export default async function ProgramDetailPage({ params }: ProgramPageProps) {
   const { slug } = await params;
-  const program = MOCK_PROGRAMS.find((p) => p.slug === slug);
+  const program = (await getProgramWithLiveAvailability(slug)) ?? MOCK_PROGRAMS.find((p) => p.slug === slug);
 
   if (!program) {
     notFound();
@@ -43,3 +46,4 @@ export default async function ProgramDetailPage({ params }: ProgramPageProps) {
 
   return <ProgramDetailView program={program} />;
 }
+
