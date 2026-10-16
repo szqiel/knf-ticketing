@@ -32,6 +32,7 @@ export const MOCK_PROGRAMS: Program[] = [
   {
     id: "prog-1",
     slug: "kardus-di-atas-lemari",
+    posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/posters/kardus-di-atas-lemari.webp",
     title: "Layar SKM",
     subtitle: "Kardus di Atas Lemari",
     description:
@@ -90,6 +91,7 @@ export const MOCK_PROGRAMS: Program[] = [
   {
     id: "prog-2",
     slug: "bincang-tanpa-batas",
+    posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/posters/bincang-tanpa-batas.webp",
     title: "Talkshow",
     subtitle: "Bincang Tanpa Batas",
     description:
@@ -118,6 +120,7 @@ export const MOCK_PROGRAMS: Program[] = [
   {
     id: "prog-3",
     slug: "sepetak-sunyi",
+    posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/posters/sepetak-sunyi.webp",
     title: "Layar Kronik",
     subtitle: "Sepetak Sunyi",
     description:
@@ -176,6 +179,7 @@ export const MOCK_PROGRAMS: Program[] = [
   {
     id: "prog-4",
     slug: "lapar-lebih-nyata-dari-dosa",
+    posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/posters/lapar-lebih-nyata-dari-dosa.webp",
     title: "Layar Raya",
     subtitle: "Lapar Lebih Nyata dari Dosa",
     description:
@@ -234,6 +238,7 @@ export const MOCK_PROGRAMS: Program[] = [
   {
     id: "prog-5",
     slug: "buku-saku-sang-pengutip",
+    posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/posters/buku-saku-sang-pengutip.webp",
     title: "Layar Raya",
     subtitle: "Buku Saku Sang Pengutip",
     description:
@@ -292,6 +297,7 @@ export const MOCK_PROGRAMS: Program[] = [
   {
     id: "prog-6",
     slug: "indonesia-raja-jawa-tengah-2026",
+    posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/posters/indonesia-raja-jawa-tengah-2026.webp",
     title: "Layar Spesial",
     subtitle: "Minikino Indonesia Raja Jawa Tengah 2026",
     description:
@@ -360,6 +366,7 @@ export const MOCK_PROGRAMS: Program[] = [
   {
     id: "prog-7",
     slug: "gradasi-pucat-pasi",
+    posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/posters/gradasi-pucat-pasi.webp",
     title: "Layar SKM",
     subtitle: "Gradasi Pucat Pasi",
     description:
@@ -418,6 +425,7 @@ export const MOCK_PROGRAMS: Program[] = [
   {
     id: "prog-8",
     slug: "melampaui-batas-batas-yang-ada",
+    posterUrl: "https://rqnjekzgafyjstnqjgzf.supabase.co/storage/v1/object/public/knf-media/posters/melampaui-batas-batas-yang-ada.webp",
     title: "Layar Raya",
     subtitle: "Melampaui Batas-batas yang Ada",
     description:
