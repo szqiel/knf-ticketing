@@ -867,8 +867,8 @@ function mapRawProgramRowToProgram(p: RawProgramRow): Program {
   const reservedCount = p.reserved_count ?? 0;
 
   // Calculate available seats according to progressive cinema tiering:
-  // Front bookable: 201 seats. If 150 occupied, rear 256 seats unlock (total 457).
-  const totalBookable = reservedCount >= REAR_ROW_UNLOCK_THRESHOLD ? 457 : 201;
+  // Front bookable: 239 seats. If 150 occupied, rear 256 seats unlock (total 495).
+  const totalBookable = reservedCount >= REAR_ROW_UNLOCK_THRESHOLD ? 495 : 239;
   const available = Math.max(0, totalBookable - reservedCount);
   const isBookingOpen = Boolean(p.booking_open);
   const isSoldOut = !isBookingOpen || available <= 0;

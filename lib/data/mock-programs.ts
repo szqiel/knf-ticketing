@@ -44,7 +44,7 @@ export const MOCK_PROGRAMS: Program[] = [
     startsAt: "10:15:00",
     endsAt: "12:10:00",
     timeSlot: "10:15 — 12:10",
-    seatsLeft: 201,
+    seatsLeft: 239,
     isSoldOut: false,
     totalFilmsCount: 4,
     films: [
@@ -120,7 +120,7 @@ export const MOCK_PROGRAMS: Program[] = [
     startsAt: "13:10:00",
     endsAt: "14:40:00",
     timeSlot: "13:10 — 14:40",
-    seatsLeft: 201,
+    seatsLeft: 239,
     isSoldOut: false,
     totalFilmsCount: 1,
     films: [
@@ -154,7 +154,7 @@ export const MOCK_PROGRAMS: Program[] = [
     startsAt: "15:20:00",
     endsAt: "17:20:00",
     timeSlot: "15:20 — 17:20",
-    seatsLeft: 201,
+    seatsLeft: 239,
     isSoldOut: false,
     totalFilmsCount: 4,
     films: [
@@ -230,7 +230,7 @@ export const MOCK_PROGRAMS: Program[] = [
     startsAt: "18:00:00",
     endsAt: "19:45:00",
     timeSlot: "18:00 — 19:45",
-    seatsLeft: 201,
+    seatsLeft: 239,
     isSoldOut: false,
     totalFilmsCount: 4,
     films: [
@@ -306,7 +306,7 @@ export const MOCK_PROGRAMS: Program[] = [
     startsAt: "09:10:00",
     endsAt: "11:00:00",
     timeSlot: "09:10 — 11:00",
-    seatsLeft: 201,
+    seatsLeft: 239,
     isSoldOut: false,
     totalFilmsCount: 4,
     films: [
@@ -382,7 +382,7 @@ export const MOCK_PROGRAMS: Program[] = [
     startsAt: "11:40:00",
     endsAt: "13:25:00",
     timeSlot: "11:40 — 13:25",
-    seatsLeft: 201,
+    seatsLeft: 239,
     isSoldOut: false,
     totalFilmsCount: 5,
     films: [
@@ -472,7 +472,7 @@ export const MOCK_PROGRAMS: Program[] = [
     startsAt: "14:05:00",
     endsAt: "16:05:00",
     timeSlot: "14:05 — 16:05",
-    seatsLeft: 201,
+    seatsLeft: 239,
     isSoldOut: false,
     totalFilmsCount: 4,
     films: [
@@ -548,7 +548,7 @@ export const MOCK_PROGRAMS: Program[] = [
     startsAt: "16:45:00",
     endsAt: "18:20:00",
     timeSlot: "16:45 — 18:20",
-    seatsLeft: 201,
+    seatsLeft: 239,
     isSoldOut: false,
     totalFilmsCount: 4,
     films: [

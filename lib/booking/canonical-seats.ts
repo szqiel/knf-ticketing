@@ -36,7 +36,7 @@ export type CreateCanonicalSeatsOptions = {
  * Seat numbering runs from right-to-left facing the screen (Seat 1 is front-right, max seat is front-left).
  *
  * Business Rules:
- * 1. Front VIP/center seats (A10-20, B10-21, C10-22, D10-22) are always blocked/sold.
+ * 1. Front VIP/center seats (A10-20) are always blocked/sold.
  * 2. Rear rows (J-S) remain blocked/sold until cumulative front seats (A-H) reach 150 occupied seats.
  */
 export function getCanonicalSeats({

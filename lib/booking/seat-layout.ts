@@ -14,16 +14,10 @@ export const REAR_ROW_UNLOCK_THRESHOLD = 150;
 /**
  * Fixed cinema rule: Front VIP / reserved center seats are unavailable (blocked/sold):
  * - Row A: 10–20 (11 seats)
- * - Row B: 10–21 (12 seats)
- * - Row C: 10–22 (13 seats)
- * - Row D: 10–22 (13 seats)
- * Total: 49 fixed reserved seats.
+ * Total: 11 fixed reserved seats.
  */
 export function isCinemaFrontUnavailable(rowName: string, number: number): boolean {
   if (rowName === "A" && number >= 10 && number <= 20) return true;
-  if (rowName === "B" && number >= 10 && number <= 21) return true;
-  if (rowName === "C" && number >= 10 && number <= 22) return true;
-  if (rowName === "D" && number >= 10 && number <= 22) return true;
   return false;
 }
 
