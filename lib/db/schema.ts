@@ -1,6 +1,7 @@
 import {
   boolean,
   date,
+  index,
   integer,
   pgEnum,
   pgTable,
@@ -89,21 +90,29 @@ export const bookingSessions = pgTable(
   (table) => [uniqueIndex("booking_session_token_hash_idx").on(table.tokenHash)],
 );
 
-export const bookings = pgTable("booking", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  programId: uuid("program_id")
-    .notNull()
-    .references(() => programs.id, { onDelete: "restrict" }),
-  fullName: text("full_name").notNull(),
-  contact: text("contact").notNull(),
-  source: bookingSource("source").notNull(),
-  status: bookingStatus("status").notNull().default("booked"),
-  idempotencyKey: text("idempotency_key"),
-  bookingSessionId: uuid("booking_session_id").references(() => bookingSessions.id, { onDelete: "set null" }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
-  cancelledReason: text("cancelled_reason"),
-}, (table) => [uniqueIndex("booking_program_idempotency_key_idx").on(table.programId, table.idempotencyKey)]);
+export const bookings = pgTable(
+  "booking",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    programId: uuid("program_id")
+      .notNull()
+      .references(() => programs.id, { onDelete: "restrict" }),
+    fullName: text("full_name").notNull(),
+    contact: text("contact").notNull(),
+    source: bookingSource("source").notNull(),
+    status: bookingStatus("status").notNull().default("booked"),
+    idempotencyKey: text("idempotency_key"),
+    bookingSessionId: uuid("booking_session_id").references(() => bookingSessions.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+    cancelledReason: text("cancelled_reason"),
+  },
+  (table) => [
+    uniqueIndex("booking_program_idempotency_key_idx").on(table.programId, table.idempotencyKey),
+    index("booking_booking_session_id_idx").on(table.bookingSessionId),
+    index("booking_program_created_idx").on(table.programId, table.createdAt),
+  ],
+);
 
 export const blockedSeats = pgTable(
   "blocked_seat",
@@ -118,7 +127,10 @@ export const blockedSeats = pgTable(
     reason: text("reason"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [uniqueIndex("blocked_program_seat_idx").on(table.programId, table.seatId)],
+  (table) => [
+    uniqueIndex("blocked_program_seat_idx").on(table.programId, table.seatId),
+    index("blocked_seat_seat_id_idx").on(table.seatId),
+  ],
 );
 
 export const reservations = pgTable(
@@ -141,6 +153,9 @@ export const reservations = pgTable(
   (table) => [
     uniqueIndex("reservation_program_seat_idx").on(table.programId, table.seatId),
     uniqueIndex("reservation_hold_token_idx").on(table.holdToken),
+    index("reservation_program_status_idx").on(table.programId, table.status),
+    index("reservation_booking_id_idx").on(table.bookingId),
+    index("reservation_seat_id_idx").on(table.seatId),
   ],
 );
 

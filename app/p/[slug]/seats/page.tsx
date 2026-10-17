@@ -8,7 +8,7 @@ import { SeatLegend } from "@/components/booking/SeatMap";
 import { ProgramTitle } from "@/components/home/ProgramTitle";
 import { createDemoSeats } from "@/lib/booking/mock-seats";
 import { MOCK_PROGRAMS } from "@/lib/data/mock-programs";
-import { getProgramWithLiveAvailability } from "@/lib/booking/service";
+import { getProgramWithLiveAvailability, getSeatMapBySlug } from "@/lib/booking/service";
 import styles from "./seats-page.module.css";
 
 export function generateStaticParams() {
@@ -30,12 +30,16 @@ export default function SeatMapPage({ params, searchParams }: SeatMapPageProps) 
 
 async function SeatMapContent({ params, searchParams }: SeatMapPageProps) {
   const { slug } = await params;
-  const resolvedSearchParams = await searchParams;
-  const program = (await getProgramWithLiveAvailability(slug)) ?? MOCK_PROGRAMS.find((item) => item.slug === slug);
+  const [resolvedSearchParams, liveProgram, liveSeatMap] = await Promise.all([
+    searchParams,
+    getProgramWithLiveAvailability(slug),
+    getSeatMapBySlug(slug).catch(() => null),
+  ]);
+  const program = liveProgram ?? MOCK_PROGRAMS.find((item) => item.slug === slug);
 
   if (!program) notFound();
 
-  const seats = createDemoSeats({ soldOut: program.isSoldOut });
+  const seats = liveSeatMap?.seats ?? createDemoSeats({ soldOut: program.isSoldOut });
   const sessionValue = resolvedSearchParams?.session;
   const sessionToken = Array.isArray(sessionValue) ? sessionValue[0] : sessionValue;
 
@@ -60,6 +64,7 @@ async function SeatMapContent({ params, searchParams }: SeatMapPageProps) {
         <BookingExperience
           seats={seats}
           programSlug={slug}
+          initialProgramId={liveSeatMap?.programId ?? null}
           dayLabel={program.dayLabel}
           timeSlot={program.timeSlot}
           sessionToken={sessionToken}

@@ -5,6 +5,8 @@ import * as schema from "./schema";
 declare global {
   // eslint-disable-next-line no-var
   var __knfSql: ReturnType<typeof postgres> | undefined;
+  // eslint-disable-next-line no-var
+  var __knfDb: ReturnType<typeof drizzle<typeof schema>> | undefined;
 }
 
 function normalizeDatabaseUrl(rawUrl: string): string {
@@ -33,6 +35,10 @@ function normalizeDatabaseUrl(rawUrl: string): string {
   return `${prefix}${user}:${encodeURIComponent(cleanPass)}@${hostAndQuery}`;
 }
 
+export function isTransactionPooler(rawUrl = process.env.DATABASE_URL ?? ""): boolean {
+  return rawUrl.includes("pooler.supabase.com") || rawUrl.includes(":6543");
+}
+
 export function getSql() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required for booking operations.");
@@ -41,11 +47,11 @@ export function getSql() {
   if (!globalThis.__knfSql) {
     const isProd = process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
     const connectionUrl = normalizeDatabaseUrl(process.env.DATABASE_URL);
-    const isSupabasePooler = connectionUrl.includes("pooler.supabase.com") || connectionUrl.includes(":6543");
+    const isSupabasePooler = isTransactionPooler(connectionUrl);
 
     globalThis.__knfSql = postgres(connectionUrl, {
-      max: 5,
-      idle_timeout: 15,
+      max: 15,
+      idle_timeout: 20,
       connect_timeout: 10,
       prepare: false,
       ssl: isProd || isSupabasePooler ? "require" : undefined,
@@ -56,5 +62,8 @@ export function getSql() {
 }
 
 export function getDb() {
-  return drizzle(getSql(), { schema });
+  if (!globalThis.__knfDb) {
+    globalThis.__knfDb = drizzle(getSql(), { schema });
+  }
+  return globalThis.__knfDb;
 }

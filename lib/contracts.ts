@@ -36,7 +36,7 @@ export function bookingTicketStorageKey(bookingId: string) {
 
 export const holdRequestSchema = z.object({
   seatId: z.string().min(1),
-  sessionToken: z.string().min(16),
+  sessionToken: z.string().min(16).optional(),
 });
 export type HoldRequest = z.infer<typeof holdRequestSchema>;
 
@@ -45,6 +45,7 @@ export const holdResponseSchema = z.object({
   holdToken: z.string().uuid(),
   seatId: z.string().min(1),
   expiresAt: z.string().datetime(),
+  sessionToken: z.string().min(16).optional(),
 });
 export type HoldResponse = z.infer<typeof holdResponseSchema>;
 

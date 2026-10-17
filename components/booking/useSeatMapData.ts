@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { seatMapResponseSchema, type Seat } from "@/lib/contracts";
 
 type UseSeatMapDataOptions = {
   programSlug?: string;
   initialSeats: Seat[];
+  initialProgramId?: string | null;
+  paused?: boolean;
 };
 
 type SeatMapDataState = {
@@ -23,11 +25,22 @@ function getErrorMessage(payload: unknown) {
   return "Seat map is temporarily unavailable.";
 }
 
-export function useSeatMapData({ programSlug, initialSeats }: UseSeatMapDataOptions): SeatMapDataState {
+export function useSeatMapData({
+  programSlug,
+  initialSeats,
+  initialProgramId = null,
+  paused = false,
+}: UseSeatMapDataOptions): SeatMapDataState {
   const [seats, setSeats] = useState(initialSeats);
-  const [programId, setProgramId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(Boolean(programSlug));
+  const [programId, setProgramId] = useState<string | null>(initialProgramId);
+  const [isLoading, setIsLoading] = useState(Boolean(programSlug && !initialProgramId));
   const [error, setError] = useState<string | null>(null);
+  const pausedRef = useRef(paused);
+  const skipInitialFetchRef = useRef(Boolean(initialProgramId));
+
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
 
   const loadSeatMap = useCallback(async (signal?: AbortSignal) => {
     if (!programSlug) return;
@@ -57,6 +70,10 @@ export function useSeatMapData({ programSlug, initialSeats }: UseSeatMapDataOpti
   }, [programSlug]);
 
   useEffect(() => {
+    if (skipInitialFetchRef.current) {
+      skipInitialFetchRef.current = false;
+      return;
+    }
     const controller = new AbortController();
     void loadSeatMap(controller.signal);
     return () => controller.abort();
@@ -69,10 +86,10 @@ export function useSeatMapData({ programSlug, initialSeats }: UseSeatMapDataOpti
     let refreshTimer: number | undefined;
 
     const scheduleRefresh = () => {
-      if (refreshTimer !== undefined) return;
+      if (pausedRef.current || refreshTimer !== undefined) return;
       refreshTimer = window.setTimeout(() => {
         refreshTimer = undefined;
-        void loadSeatMap();
+        if (!pausedRef.current) void loadSeatMap();
       }, 80);
     };
 
@@ -89,14 +106,14 @@ export function useSeatMapData({ programSlug, initialSeats }: UseSeatMapDataOpti
 
     // Resilient fallback polling: keeps seat holds & bookings in sync every 3.5s
     const pollInterval = window.setInterval(() => {
-      if (document.visibilityState === "visible") {
+      if (document.visibilityState === "visible" && !pausedRef.current) {
         void loadSeatMap();
       }
     }, 3500);
 
     // Refresh immediately when returning to tab or unlocking mobile screen
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
+      if (document.visibilityState === "visible" && !pausedRef.current) {
         void loadSeatMap();
       }
     };

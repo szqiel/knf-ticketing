@@ -5,12 +5,25 @@ import {
   isFrontCinemaRow,
   isRearCinemaRow,
   isRearRowUnlocked,
-  REAR_ROW_UNLOCK_THRESHOLD,
 } from "./seat-layout";
 
 export const CANONICAL_SEATS: readonly Seat[] = Object.freeze(canonicalSeatsRaw as Seat[]);
 
 export const CANONICAL_SEAT_COUNT = CANONICAL_SEATS.length;
+
+export const CANONICAL_SEATS_BY_ID: ReadonlyMap<string, Seat> = new Map(
+  CANONICAL_SEATS.map((seat) => [seat.id, seat]),
+);
+
+export const FRONT_SEAT_IDS: ReadonlySet<string> = new Set(
+  CANONICAL_SEATS.filter((seat) => isFrontCinemaRow(seat.rowName)).map((seat) => seat.id),
+);
+
+export const FIXED_BLOCKED_FRONT_SEAT_IDS: ReadonlySet<string> = new Set(
+  CANONICAL_SEATS.filter(
+    (seat) => isFrontCinemaRow(seat.rowName) && isCinemaFrontUnavailable(seat.rowName, seat.number),
+  ).map((seat) => seat.id),
+);
 
 export type CreateCanonicalSeatsOptions = {
   soldOut?: boolean;

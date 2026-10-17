@@ -44,7 +44,10 @@ export async function DELETE(
     return NextResponse.json({ error: "Invalid program id.", code: "INVALID_PROGRAM" }, { status: 400 });
   }
 
-  const bodySchema = holdRequestSchema.extend({ holdToken: z.string().uuid() });
+  const bodySchema = holdRequestSchema.extend({
+    holdToken: z.string().uuid(),
+    sessionToken: z.string().min(16),
+  });
   const parsedBody = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsedBody.success) {
     return NextResponse.json({ error: "Hold and session details are required.", code: "INVALID_REQUEST" }, { status: 400 });

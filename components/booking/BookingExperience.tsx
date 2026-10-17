@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   BOOKING_SESSION_STORAGE_KEY,
   bookingTicketStorageKey,
-  bookingSessionSchema,
   bookingResponseSchema,
   holdResponseSchema,
   type BookingResponse,
@@ -21,6 +20,7 @@ import { useSeatMapData } from "./useSeatMapData";
 type BookingExperienceProps = {
   seats: Seat[];
   programSlug?: string;
+  initialProgramId?: string | null;
   dayLabel?: string;
   timeSlot?: string;
   sessionToken?: string;
@@ -57,6 +57,7 @@ function formatHoldTime(seconds: number | null) {
 export function BookingExperience({
   seats: initialSeats,
   programSlug,
+  initialProgramId = null,
   dayLabel,
   timeSlot,
   sessionToken: initialSessionToken,
@@ -64,7 +65,14 @@ export function BookingExperience({
   onBookingComplete,
   seatMapProps,
 }: BookingExperienceProps) {
-  const seatMap = useSeatMapData({ programSlug, initialSeats });
+  const [isHolding, setIsHolding] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const seatMap = useSeatMapData({
+    programSlug,
+    initialSeats,
+    initialProgramId,
+    paused: isHolding || isSubmitting,
+  });
   const router = useRouter();
   const seats = seatMap.seats;
   const [sessionToken, setSessionToken] = useState<string | null>(initialSessionToken ?? null);
@@ -73,12 +81,12 @@ export function BookingExperience({
   const [noSeatsOpen, setNoSeatsOpen] = useState(false);
   const [activeHold, setActiveHold] = useState<HoldResponse | null>(null);
   const [secondsRemaining, setSecondsRemaining] = useState<number | null>(null);
-  const [isHolding, setIsHolding] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
   const activeHoldRef = useRef<HoldResponse | null>(null);
-  const programIdRef = useRef<string | null>(null);
-  const sessionTokenRef = useRef<string | null>(null);
+  const holdPromiseRef = useRef<Promise<HoldResponse | null> | null>(null);
+  const detailsOpenRef = useRef(false);
+  const programIdRef = useRef<string | null>(initialProgramId);
+  const sessionTokenRef = useRef<string | null>(initialSessionToken ?? null);
   const idleResetInProgressRef = useRef(false);
 
   useEffect(() => {
@@ -112,6 +120,10 @@ export function BookingExperience({
   }, [activeHold]);
 
   useEffect(() => {
+    detailsOpenRef.current = detailsOpen;
+  }, [detailsOpen]);
+
+  useEffect(() => {
     programIdRef.current = seatMap.programId;
   }, [seatMap.programId]);
 
@@ -119,11 +131,22 @@ export function BookingExperience({
     sessionTokenRef.current = sessionToken;
   }, [sessionToken]);
 
+  const persistSessionToken = useCallback((token: string) => {
+    sessionTokenRef.current = token;
+    setSessionToken(token);
+    try {
+      window.sessionStorage.setItem(BOOKING_SESSION_STORAGE_KEY, token);
+    } catch {
+      // Ignore storage quota issues in kiosk mode.
+    }
+  }, []);
+
   const releaseHold = useCallback(async (hold: HoldResponse | null) => {
     setActiveHold(null);
     setSecondsRemaining(null);
 
-    if (!hold || !seatMap.programId || !sessionToken) return;
+    const effectiveToken = hold?.sessionToken ?? sessionTokenRef.current;
+    if (!hold || !seatMap.programId || !effectiveToken) return;
 
     try {
       await fetch(`/api/programs/${seatMap.programId}/hold`, {
@@ -132,29 +155,14 @@ export function BookingExperience({
         body: JSON.stringify({
           seatId: hold.seatId,
           holdToken: hold.holdToken,
-          sessionToken,
+          sessionToken: effectiveToken,
         }),
         keepalive: true,
       });
     } catch {
       // Release is best effort; the database TTL remains authoritative.
     }
-  }, [seatMap.programId, sessionToken]);
-
-  const createBookingSession = useCallback(async () => {
-    const response = await fetch("/api/booking/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-    });
-    const payload = await readApiResponse(response);
-    const parsed = bookingSessionSchema.safeParse(payload);
-    if (!parsed.success) throw new Error("Booking session response is invalid.");
-
-    sessionTokenRef.current = parsed.data.sessionToken;
-    setSessionToken(parsed.data.sessionToken);
-    window.sessionStorage.setItem(BOOKING_SESSION_STORAGE_KEY, parsed.data.sessionToken);
-    return parsed.data.sessionToken;
-  }, []);
+  }, [seatMap.programId]);
 
   const clearBookingSession = useCallback(() => {
     sessionTokenRef.current = null;
@@ -214,25 +222,31 @@ export function BookingExperience({
     };
   }, [resetKioskToHome]);
 
-  const holdSeatWithSession = useCallback(async (seatId: string, token: string) => {
+  const holdSeatWithSession = useCallback(async (seatId: string, token?: string | null) => {
     if (!seatMap.programId) throw new Error(SEAT_MAP_CONNECTION_ERROR);
 
     const response = await fetch(`/api/programs/${seatMap.programId}/hold`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ seatId, sessionToken: token }),
+      body: JSON.stringify({
+        seatId,
+        ...(token ? { sessionToken: token } : {}),
+      }),
     });
     const payload = await readApiResponse(response);
     const parsed = holdResponseSchema.safeParse(payload);
     if (!parsed.success) throw new Error("Hold response is invalid.");
+    if (parsed.data.sessionToken) {
+      persistSessionToken(parsed.data.sessionToken);
+    }
     return parsed.data;
-  }, [seatMap.programId]);
+  }, [persistSessionToken, seatMap.programId]);
 
   useEffect(() => {
     return () => {
       const hold = activeHoldRef.current;
       const programId = programIdRef.current;
-      const token = sessionTokenRef.current;
+      const token = hold?.sessionToken ?? sessionTokenRef.current;
       if (!hold || !programId || !token) return;
 
       void fetch(`/api/programs/${programId}/hold`, {
@@ -333,43 +347,48 @@ export function BookingExperience({
       return;
     }
 
+    const targetSeatId = selectedSeat.id;
     setIsHolding(true);
     setBookingError(null);
-    try {
-      let activeSessionToken = sessionToken ?? await createBookingSession();
-      let hold: HoldResponse;
+    detailsOpenRef.current = true;
+    setDetailsOpen(true);
 
+    const holdTask = (async (): Promise<HoldResponse | null> => {
       try {
-        hold = await holdSeatWithSession(selectedSeat.id, activeSessionToken);
+        const hold = await holdSeatWithSession(targetSeatId, sessionTokenRef.current);
+        if (!detailsOpenRef.current) {
+          void releaseHold(hold);
+          return null;
+        }
+        setActiveHold(hold);
+        return hold;
       } catch (error) {
         const failure = error as ApiFailure;
-        if (failure.code !== "SESSION_INVALID") throw error;
-
-        clearBookingSession();
-        activeSessionToken = await createBookingSession();
-        hold = await holdSeatWithSession(selectedSeat.id, activeSessionToken);
+        detailsOpenRef.current = false;
+        setDetailsOpen(false);
+        setBookingError(
+          failure.code === "SESSION_INVALID"
+            ? "Session booking diperbarui. Silakan pilih kursi lagi."
+            : failure.message || "Unable to hold that seat.",
+        );
+        void seatMap.refresh();
+        return null;
+      } finally {
+        setIsHolding(false);
+        holdPromiseRef.current = null;
       }
+    })();
 
-      setActiveHold(hold);
-      setDetailsOpen(true);
-    } catch (error) {
-      const failure = error as ApiFailure;
-      setBookingError(
-        failure.code === "SESSION_INVALID"
-          ? "Session booking diperbarui. Silakan pilih kursi lagi."
-          : failure.message || "Unable to hold that seat.",
-      );
-      await seatMap.refresh();
-    } finally {
-      setIsHolding(false);
-    }
+    holdPromiseRef.current = holdTask;
+    await holdTask;
   };
 
   const submitDetails = async (details: BookingDetails) => {
-    if (!selectedSeat || !activeHold || isSubmitting) return;
+    if (!selectedSeat || isSubmitting) return;
 
     // DEMO / MOCK FALLBACK (Bypass when database is not connected for UI/UX testing)
     if (!seatMap.programId) {
+      if (!activeHold) return;
       setIsSubmitting(true);
       setBookingError(null);
       try {
@@ -420,11 +439,15 @@ export function BookingExperience({
       return;
     }
 
-    if (!sessionToken) return;
-
     setIsSubmitting(true);
     setBookingError(null);
     try {
+      const resolvedHold = activeHoldRef.current ?? (holdPromiseRef.current ? await holdPromiseRef.current : null);
+      const effectiveSessionToken = resolvedHold?.sessionToken ?? sessionTokenRef.current;
+      if (!resolvedHold || !effectiveSessionToken) {
+        return;
+      }
+
       const idempotencyKey = typeof window.crypto.randomUUID === "function"
         ? window.crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -436,8 +459,8 @@ export function BookingExperience({
         },
         body: JSON.stringify({
           seatId: selectedSeat.id,
-          holdToken: activeHold.holdToken,
-          sessionToken,
+          holdToken: resolvedHold.holdToken,
+          sessionToken: effectiveSessionToken,
           fullName: details.fullName,
           contact: details.contact,
           idempotencyKey,
@@ -502,6 +525,7 @@ export function BookingExperience({
 
   const closeDetails = () => {
     if (isSubmitting) return;
+    detailsOpenRef.current = false;
     setDetailsOpen(false);
     setSelectedSeatId(null);
     void releaseHold(activeHold);

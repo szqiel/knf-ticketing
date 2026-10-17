@@ -1,5 +1,4 @@
-import { getSql } from "@/lib/db/client";
-
+import { getSql, isTransactionPooler } from "@/lib/db/client";
 
 export async function GET(
   request: Request,
@@ -34,18 +33,22 @@ export async function GET(
       send("ready", { programId });
       heartbeat = setInterval(() => send("heartbeat", { at: new Date().toISOString() }), 20_000);
 
-      try {
-        listener = await getSql().listen("seats_changed", (payload) => {
-          try {
-            const data = JSON.parse(payload) as { programId?: string; changedAt?: string };
-            if (data.programId === programId) send("seats_changed", data);
-          } catch {
-            // Ignore malformed notifications and keep the stream alive.
-          }
-        });
-      } catch (error) {
-        console.error("Unable to subscribe to seat updates", error);
-        send("error", { message: "Realtime updates are temporarily unavailable." });
+      // Avoid reserving a dedicated LISTEN connection on transaction poolers (:6543),
+      // which starves the connection pool and does not relay cross-transaction notifications.
+      if (!isTransactionPooler()) {
+        try {
+          listener = await getSql().listen("seats_changed", (payload) => {
+            try {
+              const data = JSON.parse(payload) as { programId?: string; changedAt?: string };
+              if (data.programId === programId) send("seats_changed", data);
+            } catch {
+              // Ignore malformed notifications and keep the stream alive.
+            }
+          });
+        } catch (error) {
+          console.error("Unable to subscribe to seat updates", error);
+          send("error", { message: "Realtime updates are temporarily unavailable." });
+        }
       }
 
       request.signal.addEventListener("abort", () => void close(), { once: true });

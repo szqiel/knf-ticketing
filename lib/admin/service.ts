@@ -1,9 +1,17 @@
 import { and, asc, desc, eq, gte, lt } from "drizzle-orm";
-import { getDb, getSql } from "@/lib/db/client";
-import { blockedSeats, bookings, films, programs, reservations, seats } from "@/lib/db/schema";
+import { getDb, getSql, isTransactionPooler } from "@/lib/db/client";
+import { blockedSeats, bookings, films, programs, reservations } from "@/lib/db/schema";
+import { CANONICAL_SEATS_BY_ID } from "@/lib/booking/canonical-seats";
 import { BookingError } from "@/lib/booking/errors";
 import { getSeatMap } from "@/lib/booking/service";
 import { isCinemaFrontUnavailable } from "@/lib/booking/seat-layout";
+
+function notifyAdminSeatChange(programId: string) {
+  if (isTransactionPooler()) return;
+  void getSql()
+    .notify("seats_changed", JSON.stringify({ programId, changedAt: new Date().toISOString() }))
+    .catch(() => {});
+}
 
 export type AudienceFilters = {
   programId?: string;
@@ -32,11 +40,13 @@ export async function getAdminPrograms() {
 }
 
 export async function getAdminSeatMap(programId: string) {
-  const seatMap = await getSeatMap(programId);
-  const blockedRows = await getDb()
-    .select({ seatId: blockedSeats.seatId, reason: blockedSeats.reason })
-    .from(blockedSeats)
-    .where(eq(blockedSeats.programId, programId));
+  const [seatMap, blockedRows] = await Promise.all([
+    getSeatMap(programId),
+    getDb()
+      .select({ seatId: blockedSeats.seatId, reason: blockedSeats.reason })
+      .from(blockedSeats)
+      .where(eq(blockedSeats.programId, programId)),
+  ]);
   const reasons = new Map(blockedRows.map((row) => [row.seatId, row.reason]));
 
   return {
@@ -56,25 +66,26 @@ export async function setSeatBlocked(
   reason = "Blocked by staff",
 ) {
   const db = getDb();
-  const [seat] = await db.select().from(seats).where(eq(seats.id, seatId)).limit(1);
+  const seat = CANONICAL_SEATS_BY_ID.get(seatId);
   if (!seat) throw new BookingError("That seat does not exist.", "SEAT_NOT_FOUND");
   if (isCinemaFrontUnavailable(seat.rowName, seat.number) && !blocked) {
     throw new BookingError("Fixed front seats cannot be unblocked.", "SEAT_BLOCKED");
   }
 
-  const [program] = await db.select({ id: programs.id }).from(programs).where(eq(programs.id, programId)).limit(1);
+  const [[program], [activeReservation]] = await Promise.all([
+    db.select({ id: programs.id }).from(programs).where(eq(programs.id, programId)).limit(1),
+    db
+      .select({ status: reservations.status })
+      .from(reservations)
+      .where(
+        and(
+          eq(reservations.programId, programId),
+          eq(reservations.seatId, seatId),
+        ),
+      )
+      .limit(1),
+  ]);
   if (!program) throw new BookingError("That program does not exist.", "PROGRAM_NOT_FOUND");
-
-  const [activeReservation] = await db
-    .select({ status: reservations.status })
-    .from(reservations)
-    .where(
-      and(
-        eq(reservations.programId, programId),
-        eq(reservations.seatId, seatId),
-      ),
-    )
-    .limit(1);
   if (blocked && (activeReservation?.status === "held" || activeReservation?.status === "booked")) {
     throw new BookingError("Cannot block a held or booked seat.", "SEAT_UNAVAILABLE");
   }
@@ -85,7 +96,7 @@ export async function setSeatBlocked(
     await db.delete(blockedSeats).where(and(eq(blockedSeats.programId, programId), eq(blockedSeats.seatId, seatId)));
   }
 
-  await getSql().notify("seats_changed", JSON.stringify({ programId, changedAt: new Date().toISOString() }));
+  notifyAdminSeatChange(programId);
   return getAdminSeatMap(programId);
 }
 
@@ -107,7 +118,7 @@ export async function listAudience({ programId, from, to }: AudienceFilters = {}
       bookingId: bookings.id,
       programId: programs.id,
       programTitle: programs.title,
-      seatLabel: seats.label,
+      seatId: reservations.seatId,
       fullName: bookings.fullName,
       contact: bookings.contact,
       status: bookings.status,
@@ -119,14 +130,21 @@ export async function listAudience({ programId, from, to }: AudienceFilters = {}
     .from(bookings)
     .innerJoin(programs, eq(programs.id, bookings.programId))
     .leftJoin(reservations, eq(reservations.bookingId, bookings.id))
-    .leftJoin(seats, eq(seats.id, reservations.seatId))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(desc(bookings.createdAt));
 
   return rows.map((row) => ({
-    ...row,
+    bookingId: row.bookingId,
+    programId: row.programId,
+    programTitle: row.programTitle,
+    seatLabel: row.seatId ? (CANONICAL_SEATS_BY_ID.get(row.seatId)?.label ?? row.seatId) : null,
+    fullName: row.fullName,
+    contact: row.contact,
+    status: row.status,
+    source: row.source,
     createdAt: row.createdAt.toISOString(),
     cancelledAt: row.cancelledAt?.toISOString() ?? null,
+    cancelledReason: row.cancelledReason,
   }));
 }
 
@@ -154,7 +172,7 @@ export async function cancelBookingAsAdmin(programId: string, bookingId: string,
   });
 
   if (result.cancelled) {
-    await getSql().notify("seats_changed", JSON.stringify({ programId, changedAt: now.toISOString() }));
+    notifyAdminSeatChange(programId);
   }
   return result;
 }
@@ -180,15 +198,13 @@ export async function deleteBookingAsAdmin(programId: string, bookingId: string)
       .limit(1);
     if (!booking) throw new BookingError("That booking does not exist.", "BOOKING_NOT_FOUND");
 
-    // Delete reservation associated with booking
     await tx.delete(reservations).where(eq(reservations.bookingId, bookingId));
-    // Delete booking record
     await tx.delete(bookings).where(eq(bookings.id, bookingId));
     return { deleted: true };
   });
 
   if (result.deleted) {
-    await getSql().notify("seats_changed", JSON.stringify({ programId, changedAt: new Date().toISOString() }));
+    notifyAdminSeatChange(programId);
   }
   return result;
 }
@@ -197,26 +213,15 @@ export async function purgeBookingsAsAdmin(programId?: string) {
   const db = getDb();
   await db.transaction(async (tx) => {
     if (programId && programId !== "all") {
-      const programBookings = await tx
-        .select({ id: bookings.id })
-        .from(bookings)
-        .where(eq(bookings.programId, programId));
-      const bookingIds = programBookings.map((b) => b.id);
-      if (bookingIds.length > 0) {
-        await tx.delete(reservations).where(eq(reservations.programId, programId));
-        await tx.delete(bookings).where(eq(bookings.programId, programId));
-      }
+      await tx.delete(reservations).where(eq(reservations.programId, programId));
+      await tx.delete(bookings).where(eq(bookings.programId, programId));
     } else {
-      // Purge all bookings and all reservation records across all programs
       await tx.delete(reservations);
       await tx.delete(bookings);
     }
   });
 
-  await getSql().notify(
-    "seats_changed",
-    JSON.stringify({ programId: programId ?? "all", changedAt: new Date().toISOString() }),
-  );
+  notifyAdminSeatChange(programId ?? "all");
   return { purged: true };
 }
 
@@ -257,7 +262,7 @@ export async function updateProgram(
     .returning();
 
   if (!updated) throw new BookingError("Program not found.", "PROGRAM_NOT_FOUND");
-  await getSql().notify("seats_changed", JSON.stringify({ programId, changedAt: new Date().toISOString() }));
+  notifyAdminSeatChange(programId);
   return updated;
 }
 
@@ -365,20 +370,29 @@ export async function reorderFilms(programId: string, filmIdsInOrder: string[]) 
 }
 
 export async function getFestivalKpis() {
-  const allPrograms = await getAdminPrograms();
-  const allAudience = await listAudience();
-
-  const totalBookings = allAudience.length;
-  const validBookings = allAudience.filter((a) => a.status === "booked").length;
-  const cancelledBookings = allAudience.filter((a) => a.status === "cancelled").length;
-  const openProgramsCount = allPrograms.filter((p) => p.bookingOpen).length;
+  const rawSql = getSql();
+  const [row] = await rawSql<
+    {
+      total_programs: number;
+      open_programs_count: number;
+      total_bookings: number;
+      valid_bookings: number;
+      cancelled_bookings: number;
+    }[]
+  >`
+    SELECT
+      (SELECT count(*)::int FROM program) AS total_programs,
+      (SELECT count(*)::int FROM program WHERE booking_open = true) AS open_programs_count,
+      (SELECT count(*)::int FROM booking) AS total_bookings,
+      (SELECT count(*)::int FROM booking WHERE status = 'booked') AS valid_bookings,
+      (SELECT count(*)::int FROM booking WHERE status = 'cancelled') AS cancelled_bookings
+  `;
 
   return {
-    totalPrograms: allPrograms.length,
-    openProgramsCount,
-    totalBookings,
-    validBookings,
-    cancelledBookings,
+    totalPrograms: row?.total_programs ?? 0,
+    openProgramsCount: row?.open_programs_count ?? 0,
+    totalBookings: row?.total_bookings ?? 0,
+    validBookings: row?.valid_bookings ?? 0,
+    cancelledBookings: row?.cancelled_bookings ?? 0,
   };
 }
-
